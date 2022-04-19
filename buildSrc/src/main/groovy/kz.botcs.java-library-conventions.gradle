@@ -1,0 +1,10 @@
+plugins {
+    id 'java-library'
+}
+
+group 'kz.botcs'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}

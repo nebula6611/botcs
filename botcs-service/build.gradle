@@ -1,0 +1,8 @@
+plugins {
+    id 'kz.botcs.java-library-conventions'
+}
+
+dependencies {
+    implementation 'org.springframework:spring-context:5.3.19'
+    api project(':botcs-client')
+}

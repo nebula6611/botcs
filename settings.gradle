@@ -1,5 +1,5 @@
 rootProject.name = 'botcs'
-include 'client'
-include 'service'
+include 'botcs-client'
+include 'botcs-service'
 include 'botcs-starter'
 

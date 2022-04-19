@@ -4,7 +4,6 @@ import kz.botcs.*;
 import kz.botcs.inmessage.InMessage;
 import org.springframework.stereotype.Component;
 
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
