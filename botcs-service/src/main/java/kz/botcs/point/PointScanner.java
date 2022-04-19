@@ -1,8 +1,9 @@
 package kz.botcs.point;
 
 import kz.botcs.*;
-import kz.botcs.client.OutMessage;
+import kz.botcs.client.outmessage.OutMessage;
 import kz.botcs.client.inmessage.InMessage;
+import kz.botcs.client.outmessage.TextOutMessage;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
@@ -78,24 +79,20 @@ public class PointScanner {
         if (result instanceof OutResponse) {
             return (OutResponse) result;
         } else if (result instanceof List) {
-            List<kz.botcs.client.OutMessage> outMessages = new ArrayList<>();
+            List<OutMessage> outMessages = new ArrayList<>();
             List<?> list = (List<?>) result;
             for (Object element : list) {
-                if (!(element instanceof kz.botcs.client.OutMessage)) {
+                if (!(element instanceof OutMessage)) {
                     throw new IllegalStateException("return type is not correct");
                 }
-                outMessages.add((kz.botcs.client.OutMessage) element);
+                outMessages.add((OutMessage) element);
             }
             return new OutResponse(null, outMessages);
-        } else if (result instanceof kz.botcs.client.OutMessage) {
+        } else if (result instanceof OutMessage) {
             return new OutResponse(null, Collections.singletonList((OutMessage) result));
+        } else if (result instanceof String) {
+            return new OutResponse(null, Collections.singletonList(new TextOutMessage(null, (String) result)));
         }
         throw new IllegalStateException("return type is not correct");
-    }
-
-    private Map<PointType, Class<? extends Annotation>> getAnnotationContainer() {
-        return Map.of(PointType.COMMAND, CommandPoint.class,
-                PointType.STAGE, StagePoint.class,
-                PointType.CALLBACK, CallbackMapping.class);
     }
 }

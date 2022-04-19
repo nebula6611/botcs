@@ -5,13 +5,13 @@ import kz.botcs.client.ChatBotUser;
 public class CallbackInMessage extends InMessage {
     private final String keyword;
     private final String text;
-    private final String messageId;
+    private final String callbackMessageId;
 
-    protected CallbackInMessage(ChatBotUser from, String keyword, String text, String messageId, String id) {
-        super(from, id);
+    public CallbackInMessage(ChatBotUser from, String keyword, String text, String callbackMessageId) {
+        super(from);
         this.keyword = keyword;
         this.text = text;
-        this.messageId = messageId;
+        this.callbackMessageId = callbackMessageId;
     }
 
     public String getKeyword() {
@@ -22,7 +22,7 @@ public class CallbackInMessage extends InMessage {
         return text;
     }
 
-    public String getMessageId() {
-        return messageId;
+    public String getCallbackMessageId() {
+        return callbackMessageId;
     }
 }

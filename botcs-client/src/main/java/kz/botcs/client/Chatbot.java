@@ -2,15 +2,12 @@ package kz.botcs.client;
 
 
 import kz.botcs.client.inmessage.InMessage;
+import kz.botcs.client.outmessage.OutMessage;
 
-public interface Chatbot<I, O> {
-
-    Class<I> getInMessageClass();
+public interface Chatbot<I> {
 
     InMessage toInMessage(I chatbotInMessage);
 
-    ChatBotUser toUser(I chatbotInMessage);
-
-    O toChatbotOutMessage(OutMessage outMessage);
+    void send(OutMessage outMessage);
 
 }

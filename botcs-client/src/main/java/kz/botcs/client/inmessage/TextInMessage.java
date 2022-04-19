@@ -1,12 +1,12 @@
-﻿package kz.botcs.client.inmessage;
+package kz.botcs.client.inmessage;
 
 import kz.botcs.client.ChatBotUser;
 
 public class TextInMessage extends InMessage {
     private final String text;
 
-    public TextInMessage(ChatBotUser from, String text, String id) {
-        super(from, id);
+    public TextInMessage(ChatBotUser from, String text) {
+        super(from);
         this.text = text;
     }
 

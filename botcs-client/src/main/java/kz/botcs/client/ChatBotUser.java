@@ -1,11 +1,31 @@
 package kz.botcs.client;
 
-public interface ChatBotUser {
-    String getId();
+public class ChatBotUser {
+    private final String id;
+    private final String firstName;
+    private final String lastName;
+    private final String username;
 
-    String getFirstName();
+    public ChatBotUser(String id, String firstName, String lastName, String username) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+    }
 
-    String getLastName();
+    public String getId() {
+        return id;
+    }
 
-    String getUsername();
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getUsername() {
+        return username;
+    }
 }
