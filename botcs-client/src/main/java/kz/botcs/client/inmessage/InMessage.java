@@ -1,6 +1,6 @@
-package kz.botcs.inmessage;
+package kz.botcs.client.inmessage;
 
-import kz.botcs.ChatBotUser;
+import kz.botcs.client.ChatBotUser;
 
 public abstract class InMessage {
     private final ChatBotUser from;

@@ -1,7 +1,8 @@
 package kz.botcs.point;
 
 import kz.botcs.*;
-import kz.botcs.inmessage.InMessage;
+import kz.botcs.client.OutMessage;
+import kz.botcs.client.inmessage.InMessage;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
@@ -22,8 +23,8 @@ public class PointScanner {
     public void scan(Collection<Object> controllers) {
         for (Object controller : controllers) {
             Class<?> controllerType = controller.getClass();
-            ChatbotController controllerAnnotation = controllerType.getAnnotation(ChatbotController.class);
-            String clientId = controllerAnnotation.clientId();
+            PointController controllerAnnotation = controllerType.getAnnotation(PointController.class);
+            String clientId = controllerAnnotation.value();
             for (Method method : controllerType.getMethods()) {
                 Point point = args -> {
                     int parameterCount = method.getParameterCount();
@@ -40,13 +41,13 @@ public class PointScanner {
                     }
                 };
 
-                CommandMapping commandMappingAnnotation = method.getAnnotation(CommandMapping.class);
-                if (commandMappingAnnotation != null) {
-                    pointContainer.put(clientId, commandMappingAnnotation.value(), PointType.COMMAND, point);
+                CommandPoint commandPointAnnotation = method.getAnnotation(CommandPoint.class);
+                if (commandPointAnnotation != null) {
+                    pointContainer.put(clientId, commandPointAnnotation.value(), PointType.COMMAND, point);
                 }
-                StageMapping stageMappingAnnotation = method.getAnnotation(StageMapping.class);
-                if (stageMappingAnnotation != null) {
-                    pointContainer.put(clientId, stageMappingAnnotation.value(), PointType.COMMAND, point);
+                StagePoint stagePointAnnotation = method.getAnnotation(StagePoint.class);
+                if (stagePointAnnotation != null) {
+                    pointContainer.put(clientId, stagePointAnnotation.value(), PointType.COMMAND, point);
                 }
                 CallbackMapping callbackMappingAnnotation = method.getAnnotation(CallbackMapping.class);
                 if (callbackMappingAnnotation != null) {
@@ -61,7 +62,7 @@ public class PointScanner {
     }
 
     private Object getParameterForType(Class<?> parameterType, PointArgs args) {
-        if (parameterType.equals(ChatBotUser.class)) {
+        if (parameterType.equals(kz.botcs.client.ChatBotUser.class)) {
             return args.getInMessage().getFrom();
         }
         if (parameterType.equals(InMessage.class)) {
@@ -77,24 +78,24 @@ public class PointScanner {
         if (result instanceof OutResponse) {
             return (OutResponse) result;
         } else if (result instanceof List) {
-            List<OutMessage> outMessages = new ArrayList<>();
+            List<kz.botcs.client.OutMessage> outMessages = new ArrayList<>();
             List<?> list = (List<?>) result;
             for (Object element : list) {
-                if (!(element instanceof OutMessage)) {
+                if (!(element instanceof kz.botcs.client.OutMessage)) {
                     throw new IllegalStateException("return type is not correct");
                 }
-                outMessages.add((OutMessage) element);
+                outMessages.add((kz.botcs.client.OutMessage) element);
             }
             return new OutResponse(null, outMessages);
-        } else if (result instanceof OutMessage) {
+        } else if (result instanceof kz.botcs.client.OutMessage) {
             return new OutResponse(null, Collections.singletonList((OutMessage) result));
         }
         throw new IllegalStateException("return type is not correct");
     }
 
     private Map<PointType, Class<? extends Annotation>> getAnnotationContainer() {
-        return Map.of(PointType.COMMAND, CommandMapping.class,
-                PointType.STAGE, StageMapping.class,
+        return Map.of(PointType.COMMAND, CommandPoint.class,
+                PointType.STAGE, StagePoint.class,
                 PointType.CALLBACK, CallbackMapping.class);
     }
 }

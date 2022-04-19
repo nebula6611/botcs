@@ -1,5 +1,6 @@
 package kz.botcs;
 
+import kz.botcs.point.PointController;
 import kz.botcs.point.PointScanner;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -19,7 +20,7 @@ public class PointScannerLoader {
     @EventListener(ApplicationReadyEvent.class)
     public void onReady(ApplicationReadyEvent event) {
         Collection<Object> controllers = event.getApplicationContext()
-                .getBeansWithAnnotation(ChatbotController.class).values();
+                .getBeansWithAnnotation(PointController.class).values();
         pointScanner.scan(controllers);
     }
 }

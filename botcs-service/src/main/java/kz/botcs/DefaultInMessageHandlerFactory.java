@@ -1,8 +1,9 @@
 package kz.botcs;
 
-import kz.botcs.inmessage.CallbackInMessage;
-import kz.botcs.inmessage.InMessage;
-import kz.botcs.inmessage.TextInMessage;
+import kz.botcs.client.Chatbot;
+import kz.botcs.client.inmessage.CallbackInMessage;
+import kz.botcs.client.inmessage.InMessage;
+import kz.botcs.client.inmessage.TextInMessage;
 import kz.botcs.point.Point;
 import kz.botcs.point.PointArgs;
 import kz.botcs.point.PointContainer;

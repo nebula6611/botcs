@@ -1,4 +1,4 @@
-package kz.botcs;
+package kz.botcs.client;
 
 
 public interface ChatbotClient<C extends Chatbot<I, O>, I, O> {

@@ -1,4 +1,4 @@
-package kz.botcs;
+package kz.botcs.client;
 
 public interface OutMessage {
 }

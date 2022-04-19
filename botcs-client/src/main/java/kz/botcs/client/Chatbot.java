@@ -1,6 +1,7 @@
-package kz.botcs;
+package kz.botcs.client;
 
-import kz.botcs.inmessage.InMessage;
+
+import kz.botcs.client.inmessage.InMessage;
 
 public interface Chatbot<I, O> {
 
