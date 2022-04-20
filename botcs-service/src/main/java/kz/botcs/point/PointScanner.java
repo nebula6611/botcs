@@ -4,7 +4,6 @@ import kz.botcs.*;
 import kz.botcs.chatbot.InMessage;
 import kz.botcs.chatbot.OutMessage;
 import kz.botcs.chatbot.TextOutMessage;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
@@ -90,7 +89,7 @@ public class PointScanner {
         } else if (result instanceof OutMessage) {
             return new OutResponse(null, Collections.singletonList((OutMessage) result));
         } else if (result instanceof String) {
-            return new OutResponse(null, Collections.singletonList(new TextOutMessage(null, (String) result)));
+            return new OutResponse(null, Collections.singletonList(new TextOutMessage(null, (String) result, null)));
         }
         throw new IllegalStateException("return type is not correct");
     }

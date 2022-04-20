@@ -14,4 +14,7 @@ dependencies {
     implementation 'io.github.openfeign:feign-jackson:11.8'
     implementation 'io.github.openfeign:feign-slf4j:11.8'
 
+    implementation 'org.mapstruct:mapstruct:1.4.2.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+
 }

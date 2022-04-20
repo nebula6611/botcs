@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 public interface Update extends RestDTO {
     @JsonProperty("update_id") Integer getUpdateId();
 
+    @Nullable
     Message getMessage();
 
     @Nullable
