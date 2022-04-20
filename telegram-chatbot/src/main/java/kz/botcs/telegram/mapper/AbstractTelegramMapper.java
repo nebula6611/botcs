@@ -14,11 +14,13 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
 
     @Override
     public InMessage toInMessage(Update update) {
-        if (update.getCallbackQuery() != null) {
-            return toCallbackInMessage(update.getCallbackQuery());
-        } else {
+        if (update.getMessage() != null) {
             return toTextInMessage(update.getMessage());
         }
+        if (update.getCallbackQuery() != null) {
+            return toCallbackInMessage(update.getCallbackQuery());
+        }
+        throw new RuntimeException();
     }
 
     @Override
@@ -33,8 +35,6 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     @Mapping(target = "text", expression = "java(split(callbackQuery.getData())[1])")
     @Mapping(target = "callbackMessageId", source = "message.messageId")
     protected abstract CallbackInMessage toCallbackInMessage(CallbackQuery callbackQuery);
-
-    protected abstract ChatBotUser toChatbotUser(User user);
 
     protected String[] split(String data) {
         return data.split(CALLBACK_DATA_SEPARATOR);
