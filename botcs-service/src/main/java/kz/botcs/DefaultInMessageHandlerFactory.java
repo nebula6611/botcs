@@ -26,7 +26,7 @@ public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
     }
 
     @Override
-    public <C extends Chatbot<I>, I> InMessageHandler<C, I> createHandler(C chatbot) {
+    public <C extends Chatbot<I>, I> InMessageHandler<I> createHandler(C chatbot) {
         return chatbotInMessage -> {
             InMessage inMessage = chatbot.toInMessage(chatbotInMessage);
             UserData userData = userDataContainer.get(chatbot.getId(), inMessage.getFrom().getId());
