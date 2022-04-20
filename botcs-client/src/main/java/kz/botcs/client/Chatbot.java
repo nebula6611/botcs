@@ -6,8 +6,10 @@ import kz.botcs.client.outmessage.OutMessage;
 
 public interface Chatbot<I> {
 
+    String getId();
+
     InMessage toInMessage(I chatbotInMessage);
 
-    void send(OutMessage outMessage);
+    void send(String id, OutMessage outMessage);
 
 }

@@ -29,16 +29,16 @@ public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
     }
 
     @Override
-    public <C extends Chatbot<I>, I> InMessageHandler<C, I> createHandler(String clientId, C chatbot) {
+    public <C extends Chatbot<I>, I> InMessageHandler<C, I> createHandler(C chatbot) {
         return chatbotInMessage -> {
             InMessage inMessage = chatbot.toInMessage(chatbotInMessage);
-            UserData userData = userDataContainer.get(clientId, inMessage.getFrom().getId());
+            UserData userData = userDataContainer.get(chatbot.getId(), inMessage.getFrom().getId());
             String stage = userData.get(USER_DATA_STAGE_KEY, String.class);
-            OutResponse outResponse = getResponse(clientId, inMessage, stage);
+            OutResponse outResponse = getResponse(chatbot.getId(), inMessage, stage);
 
             userData.put(USER_DATA_STAGE_KEY, outResponse.getStage());
             for (OutMessage outMessage : outResponse.getOutMessages()) {
-                chatbot.send(outMessage);
+                chatbot.send(inMessage.getFrom().getId(), outMessage);
             }
         };
     }
