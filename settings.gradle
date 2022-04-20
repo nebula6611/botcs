@@ -2,5 +2,5 @@ rootProject.name = 'botcs'
 include 'botcs-client'
 include 'botcs-service'
 include 'botcs-starter'
-include 'telegram-client'
+include 'telegram-chatbot'
 

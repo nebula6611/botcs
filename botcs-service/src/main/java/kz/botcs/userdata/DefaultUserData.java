@@ -28,6 +28,10 @@ public class DefaultUserData implements UserData {
     }
 
     public void put(String key, Object value) {
-        map.put(key, value);
+        if (value == null) {
+            map.remove(key);
+        } else {
+            map.put(key, value);
+        }
     }
 }

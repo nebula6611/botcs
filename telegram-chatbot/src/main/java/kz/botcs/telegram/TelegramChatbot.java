@@ -2,9 +2,11 @@ package kz.botcs.telegram;
 
 import feign.Feign;
 import feign.Logger;
+import feign.Param;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.okhttp.OkHttpClient;
+import feign.slf4j.Slf4jLogger;
 import kz.botcs.client.ChatBotUser;
 import kz.botcs.client.Chatbot;
 import kz.botcs.client.inmessage.CallbackInMessage;
@@ -13,6 +15,8 @@ import kz.botcs.client.inmessage.TextInMessage;
 import kz.botcs.client.outmessage.OutMessage;
 import kz.botcs.client.outmessage.TextOutMessage;
 import kz.botcs.telegram.dto.*;
+
+import java.util.List;
 
 public class TelegramChatbot implements Chatbot<Update> {
     private static final String CALLBACK_DATA_SEPARATOR = "#SEPARATOR#";
@@ -50,6 +54,14 @@ public class TelegramChatbot implements Chatbot<Update> {
         if (outMessage instanceof TextOutMessage) {
             sendTextOutMessage(userIdInt, (TextOutMessage) outMessage);
         }
+    }
+
+    public List<Update> getUpdates(Integer offset) {
+        return feignTarget.getUpdates(offset).getResult();
+    }
+
+    public void deleteWebhook() {
+        feignTarget.deleteWebhook();
     }
 
     private InMessage toTextInMessage(Update update) {

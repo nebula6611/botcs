@@ -1,5 +1,6 @@
 package kz.botcs.telegram.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.immutables.value.Value;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 public interface ReplyKeyboardMarkup extends ReplyMarkup {
     List<List<KeyboardButton>> getKeyboard();
 
-    Boolean getResizeKeyboard();
+    @JsonProperty("resize_keyboard") Boolean getResizeKeyboard();
 
-    Boolean getOneTimeKeyboard();
+    @JsonProperty("one_time_keyboard") Boolean getOneTimeKeyboard();
 }
