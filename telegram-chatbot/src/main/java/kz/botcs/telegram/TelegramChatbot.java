@@ -2,19 +2,14 @@ package kz.botcs.telegram;
 
 import feign.Feign;
 import feign.Logger;
-import feign.Param;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.okhttp.OkHttpClient;
-import feign.slf4j.Slf4jLogger;
-import kz.botcs.client.ChatBotUser;
-import kz.botcs.client.Chatbot;
-import kz.botcs.client.inmessage.CallbackInMessage;
-import kz.botcs.client.inmessage.InMessage;
-import kz.botcs.client.inmessage.TextInMessage;
-import kz.botcs.client.outmessage.OutMessage;
-import kz.botcs.client.outmessage.TextOutMessage;
-import kz.botcs.telegram.dto.*;
+import kz.botcs.chatbot.*;
+import kz.botcs.telegram.dto.ImmutableMessageTo;
+import kz.botcs.telegram.dto.MessageTo;
+import kz.botcs.telegram.dto.Update;
+import kz.botcs.telegram.dto.User;
 
 import java.util.List;
 

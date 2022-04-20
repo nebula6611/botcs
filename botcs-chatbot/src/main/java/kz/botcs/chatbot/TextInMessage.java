@@ -1,6 +1,4 @@
-package kz.botcs.client.inmessage;
-
-import kz.botcs.client.ChatBotUser;
+package kz.botcs.chatbot;
 
 public class TextInMessage extends InMessage {
     private final String text;

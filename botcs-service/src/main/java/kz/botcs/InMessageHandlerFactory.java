@@ -1,6 +1,7 @@
 package kz.botcs;
 
-import kz.botcs.client.Chatbot;
+
+import kz.botcs.chatbot.Chatbot;
 
 public interface InMessageHandlerFactory {
 

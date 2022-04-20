@@ -1,8 +1,8 @@
 package kz.botcs.point;
 
-import kz.botcs.PointType;
 import org.springframework.stereotype.Component;
 
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,12 +11,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PointContainer {
     private final Map<Key, Point> map = new ConcurrentHashMap<>();
 
-    public Point get(String clientId, String keyword, PointType type) {
-        return map.get(new Key(clientId, keyword, type));
+    public Point get(String chatbotId, String keyword, Class<? extends Annotation> type) {
+        return map.get(new Key(chatbotId, keyword, type));
     }
 
-    public void put(String clientId, String keyword, PointType type, Point point) {
-        Key key = new Key(clientId, keyword, type);
+    public void put(String chatbotId, String keyword, Class<? extends Annotation> type, Point point) {
+        Key key = new Key(chatbotId, keyword, type);
         if (map.containsKey(key)) {
             throw new IllegalStateException("Point already exist");
         }
@@ -24,12 +24,12 @@ public class PointContainer {
     }
 
     public static class Key {
-        private final String clientId;
+        private final String chatbotId;
         private final String keyword;
-        private final PointType type;
+        private final Class<? extends Annotation> type;
 
-        public Key(String clientId, String keyword, PointType type) {
-            this.clientId = clientId;
+        public Key(String chatbotId, String keyword, Class<? extends Annotation> type) {
+            this.chatbotId = chatbotId;
             this.keyword = keyword;
             this.type = type;
         }
@@ -39,12 +39,12 @@ public class PointContainer {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Key key = (Key) o;
-            return clientId.equals(key.clientId) && keyword.equals(key.keyword) && type == key.type;
+            return chatbotId.equals(key.chatbotId) && keyword.equals(key.keyword) && type == key.type;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(clientId, keyword, type);
+            return Objects.hash(chatbotId, keyword, type);
         }
     }
 }

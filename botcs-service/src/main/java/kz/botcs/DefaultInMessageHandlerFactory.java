@@ -1,14 +1,10 @@
 package kz.botcs;
 
-import kz.botcs.client.Chatbot;
-import kz.botcs.client.inmessage.CallbackInMessage;
-import kz.botcs.client.inmessage.InMessage;
-import kz.botcs.client.inmessage.TextInMessage;
-import kz.botcs.client.outmessage.OutMessage;
-import kz.botcs.client.outmessage.TextOutMessage;
-import kz.botcs.point.Point;
-import kz.botcs.point.PointArgs;
-import kz.botcs.point.PointContainer;
+import kz.botcs.chatbot.Chatbot;
+import kz.botcs.chatbot.InMessage;
+import kz.botcs.chatbot.OutMessage;
+import kz.botcs.chatbot.TextOutMessage;
+import kz.botcs.point.*;
 import kz.botcs.userdata.UserDataContainer;
 import org.springframework.stereotype.Component;
 
@@ -16,16 +12,17 @@ import java.util.List;
 
 @Component
 public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
-    private static final String USER_DATA_STAGE_KEY = "USER_DATA_STAGE";
-
     private final PointContainer pointContainer;
     private final UserDataContainer userDataContainer;
+    private final PointHandlerContainer pointHandlerContainer;
 
     public DefaultInMessageHandlerFactory(
             PointContainer pointContainer,
-            UserDataContainer userDataContainer) {
+            UserDataContainer userDataContainer,
+            PointHandlerContainer pointHandlerContainer) {
         this.pointContainer = pointContainer;
         this.userDataContainer = userDataContainer;
+        this.pointHandlerContainer = pointHandlerContainer;
     }
 
     @Override
@@ -33,36 +30,30 @@ public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
         return chatbotInMessage -> {
             InMessage inMessage = chatbot.toInMessage(chatbotInMessage);
             UserData userData = userDataContainer.get(chatbot.getId(), inMessage.getFrom().getId());
-            String stage = userData.get(USER_DATA_STAGE_KEY, String.class);
-            OutResponse outResponse = getResponse(chatbot.getId(), inMessage, stage);
+            OutResponse outResponse = getResponse(chatbot.getId(), inMessage);
 
-            userData.put(USER_DATA_STAGE_KEY, outResponse.getStage());
+            SystemUserData systemUserData = userData.get(SystemUserData.class);
+            systemUserData.setStage(outResponse.getStage());
             for (OutMessage outMessage : outResponse.getOutMessages()) {
                 chatbot.send(inMessage.getFrom().getId(), outMessage);
             }
         };
     }
 
-    private OutResponse getResponse(String clientId, InMessage inMessage, String stage) {
+    private OutResponse getResponse(String chatbotId, InMessage inMessage) {
 
-        if (inMessage instanceof TextInMessage) {
-            TextInMessage textInMessage = (TextInMessage) inMessage;
-            Point point = pointContainer.get(clientId, textInMessage.getText(), PointType.COMMAND);
-            if (point != null) {
-                return point.execute(new PointArgs(null, inMessage));
-            }
-            if (stage != null) {
-                point = pointContainer.get(clientId, stage, PointType.STAGE);
-                if (point != null) {
-                    return point.execute(new PointArgs(textInMessage.getText(), inMessage));
-                }
-            }
+        for (PointHandler pointHandler : pointHandlerContainer.getPointHandlers()) {
+            Pair<String, String> keywordAndText = pointHandler.keywordAndText(chatbotId, inMessage);
+            if (keywordAndText == null) continue;
+            String keyword = keywordAndText.getKey();
+            String text = keywordAndText.getValue();
+            Point point = pointContainer.get(chatbotId, keyword, pointHandler.getType());
+            if (point == null) continue;
+            return point.execute(new PointArgs(text, inMessage));
         }
-        if (inMessage instanceof CallbackInMessage) {
-            CallbackInMessage callbackInMessage = (CallbackInMessage) inMessage;
-            Point point = pointContainer.get(clientId, callbackInMessage.getKeyword(), PointType.CALLBACK);
-            return point.execute(new PointArgs(callbackInMessage.getText(), inMessage));
-        }
-        return new OutResponse(null, List.of(new TextOutMessage(null, "???")));
+
+        return new OutResponse(SystemUserData.STAGE_DEFAULT, List.of(new TextOutMessage(null, "???")));
     }
+
+
 }

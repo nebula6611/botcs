@@ -1,4 +1,4 @@
-package kz.botcs.client;
+package kz.botcs.chatbot;
 
 public class ChatBotUser {
     private final String id;

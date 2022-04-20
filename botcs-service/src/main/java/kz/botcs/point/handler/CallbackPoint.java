@@ -1,4 +1,4 @@
-package kz.botcs.point;
+package kz.botcs.point.handler;
 
 import org.springframework.stereotype.Component;
 
@@ -10,6 +10,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Component
-public @interface CommandPoint {
+public @interface CallbackPoint {
     String value();
 }

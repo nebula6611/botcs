@@ -1,4 +1,4 @@
-package kz.botcs.client.outmessage;
+package kz.botcs.chatbot;
 
 public class TextOutMessage implements OutMessage {
     private final String id;

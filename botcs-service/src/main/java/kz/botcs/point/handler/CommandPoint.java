@@ -1,5 +1,6 @@
-package kz.botcs.point;
+package kz.botcs.point.handler;
 
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,6 +9,7 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface StagePoint {
+@Component
+public @interface CommandPoint {
     String value();
 }

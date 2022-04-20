@@ -1,6 +1,7 @@
 package kz.botcs;
 
-import kz.botcs.client.outmessage.OutMessage;
+
+import kz.botcs.chatbot.OutMessage;
 
 import java.util.Collections;
 import java.util.List;

@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class UserDataContainer {
     private final Map<Key, UserData> map = new ConcurrentHashMap<>();
 
-    public UserData get(String clientId, String userId) {
-        Key key = new Key(clientId, userId);
+    public UserData get(String chatbotId, String userId) {
+        Key key = new Key(chatbotId, userId);
         UserData userData = map.get(key);
         if (userData == null) {
             userData = new DefaultUserData();
@@ -22,11 +22,11 @@ public class UserDataContainer {
     }
 
     private static class Key {
-        private final String clientId;
+        private final String chatbotId;
         private final String userId;
 
-        private Key(String clientId, String userId) {
-            this.clientId = clientId;
+        private Key(String chatbotId, String userId) {
+            this.chatbotId = chatbotId;
             this.userId = userId;
         }
 
@@ -35,12 +35,12 @@ public class UserDataContainer {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Key key = (Key) o;
-            return clientId.equals(key.clientId) && userId.equals(key.userId);
+            return chatbotId.equals(key.chatbotId) && userId.equals(key.userId);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(clientId, userId);
+            return Objects.hash(chatbotId, userId);
         }
     }
 }

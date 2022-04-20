@@ -1,9 +1,10 @@
 package kz.botcs.point;
 
 import kz.botcs.*;
-import kz.botcs.client.outmessage.OutMessage;
-import kz.botcs.client.inmessage.InMessage;
-import kz.botcs.client.outmessage.TextOutMessage;
+import kz.botcs.chatbot.InMessage;
+import kz.botcs.chatbot.OutMessage;
+import kz.botcs.chatbot.TextOutMessage;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
@@ -16,16 +17,20 @@ import java.util.*;
 public class PointScanner {
 
     private final PointContainer pointContainer;
+    private final PointHandlerContainer pointHandlerContainer;
 
-    public PointScanner(PointContainer pointContainer) {
+    public PointScanner(
+            PointContainer pointContainer,
+            PointHandlerContainer pointHandlerContainer) {
         this.pointContainer = pointContainer;
+        this.pointHandlerContainer = pointHandlerContainer;
     }
 
     public void scan(Collection<Object> controllers) {
         for (Object controller : controllers) {
             Class<?> controllerType = controller.getClass();
             PointController controllerAnnotation = controllerType.getAnnotation(PointController.class);
-            String clientId = controllerAnnotation.value();
+            String chatbotId = controllerAnnotation.value();
             for (Method method : controllerType.getMethods()) {
                 Point point = args -> {
                     int parameterCount = method.getParameterCount();
@@ -41,18 +46,12 @@ public class PointScanner {
                         return errorOutResponse();
                     }
                 };
-
-                CommandPoint commandPointAnnotation = method.getAnnotation(CommandPoint.class);
-                if (commandPointAnnotation != null) {
-                    pointContainer.put(clientId, commandPointAnnotation.value(), PointType.COMMAND, point);
-                }
-                StagePoint stagePointAnnotation = method.getAnnotation(StagePoint.class);
-                if (stagePointAnnotation != null) {
-                    pointContainer.put(clientId, stagePointAnnotation.value(), PointType.COMMAND, point);
-                }
-                CallbackMapping callbackMappingAnnotation = method.getAnnotation(CallbackMapping.class);
-                if (callbackMappingAnnotation != null) {
-                    pointContainer.put(clientId, callbackMappingAnnotation.value(), PointType.COMMAND, point);
+                for (PointHandler pointHandler : pointHandlerContainer.getPointHandlers()) {
+                    Annotation annotation = method.getAnnotation(pointHandler.getType());
+                    if (annotation != null) {
+                        String value = (String) AnnotationUtils.getValue(annotation);
+                        pointContainer.put(chatbotId, value, pointHandler.getType(), point);
+                    }
                 }
             }
         }
@@ -63,7 +62,7 @@ public class PointScanner {
     }
 
     private Object getParameterForType(Class<?> parameterType, PointArgs args) {
-        if (parameterType.equals(kz.botcs.client.ChatBotUser.class)) {
+        if (parameterType.equals(ChatBotUser.class)) {
             return args.getInMessage().getFrom();
         }
         if (parameterType.equals(InMessage.class)) {

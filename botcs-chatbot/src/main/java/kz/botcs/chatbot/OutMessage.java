@@ -1,4 +1,4 @@
-package kz.botcs;
+package kz.botcs.chatbot;
 
 public interface OutMessage {
 }

@@ -1,7 +1,7 @@
 package kz.botcs.point;
 
 
-import kz.botcs.client.inmessage.InMessage;
+import kz.botcs.chatbot.InMessage;
 
 public class PointArgs {
     private final String text;
