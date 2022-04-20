@@ -49,8 +49,8 @@ public class PointScanner {
                 for (PointHandler pointHandler : pointHandlerContainer.getPointHandlers()) {
                     Annotation annotation = method.getAnnotation(pointHandler.getType());
                     if (annotation != null) {
-                        String value = (String) AnnotationUtils.getValue(annotation);
-                        pointContainer.put(chatbotId, value, pointHandler.getType(), point);
+                        String keyword = pointHandler.getKeyword(annotation);
+                        pointContainer.put(chatbotId, keyword, pointHandler.getType(), point);
                     }
                 }
             }

@@ -9,10 +9,8 @@ import kz.botcs.point.PointHandler;
 import kz.botcs.userdata.UserDataContainer;
 import org.springframework.stereotype.Component;
 
-import java.lang.annotation.Annotation;
-
 @Component
-public class StagePointHandler implements PointHandler {
+public class StagePointHandler implements PointHandler<StagePoint> {
 
     private final UserDataContainer userDataContainer;
 
@@ -26,8 +24,13 @@ public class StagePointHandler implements PointHandler {
     }
 
     @Override
-    public Class<? extends Annotation> getType() {
+    public Class<StagePoint> getType() {
         return StagePoint.class;
+    }
+
+    @Override
+    public String getKeyword(StagePoint stagePoint) {
+        return stagePoint.value();
     }
 
     @Override

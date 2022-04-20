@@ -7,29 +7,30 @@ import kz.botcs.point.PointHandler;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CommandPointHandler implements PointHandler<CommandPoint> {
+public class DefaultTextPointHandler implements PointHandler<DefaultTextPoint> {
+
+    private static final String KEYWORD = "keyword";
 
     @Override
     public Integer getOrder() {
-        return 101;
+        return 103;
     }
 
     @Override
-    public Class<CommandPoint> getType() {
-        return CommandPoint.class;
+    public Class<DefaultTextPoint> getType() {
+        return DefaultTextPoint.class;
     }
 
     @Override
-    public String getKeyword(CommandPoint commandPoint) {
-        return commandPoint.value();
+    public String getKeyword(DefaultTextPoint annotation) {
+        return KEYWORD;
     }
 
     @Override
     public Pair<String, String> keywordAndText(String chatbotId, InMessage inMessage) {
         if (!(inMessage instanceof TextInMessage)) return null;
         TextInMessage textInMessage = (TextInMessage) inMessage;
-        return new Pair<>(textInMessage.getText(), null);
+        return new Pair<>(KEYWORD, textInMessage.getText());
     }
-
-
 }
+

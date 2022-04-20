@@ -42,7 +42,7 @@ public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
 
     private OutResponse getResponse(String chatbotId, InMessage inMessage) {
 
-        for (PointHandler pointHandler : pointHandlerContainer.getPointHandlers()) {
+        for (PointHandler<?> pointHandler : pointHandlerContainer.getPointHandlers()) {
             Pair<String, String> keywordAndText = pointHandler.keywordAndText(chatbotId, inMessage);
             if (keywordAndText == null) continue;
             String keyword = keywordAndText.getKey();

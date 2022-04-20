@@ -4,10 +4,12 @@ import kz.botcs.chatbot.InMessage;
 
 import java.lang.annotation.Annotation;
 
-public interface PointHandler {
+public interface PointHandler<A extends Annotation> {
     Integer getOrder();
 
-    Class<? extends Annotation> getType();
+    Class<A> getType();
+
+    String getKeyword(A annotation);
 
     Pair<String, String> keywordAndText(String chatbotId, InMessage inMessage);
 }

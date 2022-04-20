@@ -6,10 +6,8 @@ import kz.botcs.point.Pair;
 import kz.botcs.point.PointHandler;
 import org.springframework.stereotype.Component;
 
-import java.lang.annotation.Annotation;
-
 @Component
-public class CallbackPointHandler implements PointHandler {
+public class CallbackPointHandler implements PointHandler<CallbackPoint> {
 
     @Override
     public Integer getOrder() {
@@ -17,8 +15,13 @@ public class CallbackPointHandler implements PointHandler {
     }
 
     @Override
-    public Class<? extends Annotation> getType() {
+    public Class<CallbackPoint> getType() {
         return CallbackPoint.class;
+    }
+
+    @Override
+    public String getKeyword(CallbackPoint callbackPoint) {
+        return callbackPoint.value();
     }
 
     @Override
