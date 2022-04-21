@@ -1,6 +1,7 @@
 package kz.botcs.point;
 
 import kz.botcs.*;
+import kz.botcs.builder.MessageBuilder;
 import kz.botcs.chatbot.InMessage;
 import kz.botcs.chatbot.OutMessage;
 import kz.botcs.chatbot.TextOutMessage;
@@ -42,7 +43,7 @@ public class PointScanner {
                         Object result = method.invoke(controller, parameters);
                         return toOutResponse(result);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        return errorOutResponse();
+                        return errorOutResponse(e);
                     }
                 };
                 for (PointHandler pointHandler : pointHandlerContainer.getPointHandlers()) {
@@ -56,8 +57,11 @@ public class PointScanner {
         }
     }
 
-    private OutResponse errorOutResponse() {
-        return null;
+    private OutResponse errorOutResponse(Exception e) {
+        e.printStackTrace();
+        return MessageBuilder.ofOutResponse().addMessage(
+                MessageBuilder.ofTextOutMessage().text("something went wrong").build()
+        ).build();
     }
 
     private Object getParameterForType(Class<?> parameterType, PointArgs args) {
@@ -89,7 +93,7 @@ public class PointScanner {
         } else if (result instanceof OutMessage) {
             return new OutResponse(null, Collections.singletonList((OutMessage) result));
         } else if (result instanceof String) {
-            return new OutResponse(null, Collections.singletonList(new TextOutMessage(null, (String) result, null)));
+            return new OutResponse(null, Collections.singletonList(new TextOutMessage(null, (String) result, null, null)));
         }
         throw new IllegalStateException("return type is not correct");
     }

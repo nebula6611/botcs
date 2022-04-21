@@ -52,7 +52,8 @@ public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
             return point.execute(new PointArgs(text, inMessage));
         }
 
-        return new OutResponse(SystemUserData.STAGE_DEFAULT, List.of(new TextOutMessage(null, "???", null)));
+        return new OutResponse(SystemUserData.STAGE_DEFAULT,
+                List.of(new TextOutMessage(null, "???", null, null)));
     }
 
 
