@@ -1,4 +1,4 @@
-package kz.botcs.chatbot;
+package kz.botcs.chatbot.outmessage;
 
 public class Button {
     private final String title;

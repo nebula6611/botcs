@@ -2,8 +2,8 @@ package kz.botcs;
 
 import kz.botcs.chatbot.Chatbot;
 import kz.botcs.chatbot.InMessage;
-import kz.botcs.chatbot.OutMessage;
-import kz.botcs.chatbot.TextOutMessage;
+import kz.botcs.chatbot.outmessage.OutMessage;
+import kz.botcs.chatbot.outmessage.TextOutMessage;
 import kz.botcs.point.*;
 import kz.botcs.userdata.UserDataContainer;
 import org.springframework.stereotype.Component;
@@ -53,7 +53,7 @@ public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
         }
 
         return new OutResponse(SystemUserData.STAGE_DEFAULT,
-                List.of(new TextOutMessage(null, "???", null, null)));
+                List.of(new TextOutMessage(null, "???", null)), null);
     }
 
 

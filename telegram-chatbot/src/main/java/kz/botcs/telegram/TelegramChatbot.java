@@ -5,12 +5,11 @@ import feign.Logger;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.okhttp.OkHttpClient;
-import kz.botcs.chatbot.Chatbot;
-import kz.botcs.chatbot.InMessage;
-import kz.botcs.chatbot.OutMessage;
-import kz.botcs.chatbot.TextOutMessage;
-import kz.botcs.telegram.dto.MessageTo;
-import kz.botcs.telegram.dto.Update;
+import kz.botcs.chatbot.*;
+import kz.botcs.chatbot.outmessage.BottomMenuOutMessage;
+import kz.botcs.chatbot.outmessage.OutMessage;
+import kz.botcs.chatbot.outmessage.TextOutMessage;
+import kz.botcs.telegram.dto.*;
 import kz.botcs.telegram.mapper.DefaultTelegramMapper;
 import kz.botcs.telegram.mapper.TelegramMapper;
 
@@ -40,7 +39,14 @@ public class TelegramChatbot implements Chatbot<Update> {
 
     @Override
     public InMessage toInMessage(Update update) {
-        return mapper.toInMessage(update);
+        InMessage inMessage = mapper.toInMessage(update);
+        if (inMessage instanceof CallbackInMessage) {
+            CallbackInMessage callbackInMessage = (CallbackInMessage) inMessage;
+            AnswerCallbackQuery answerCallbackQuery = ImmutableAnswerCallbackQuery.builder()
+                    .callbackQueryId(callbackInMessage.getId()).build();
+            feignTarget.answerCallbackQuery(answerCallbackQuery);
+        }
+        return inMessage;
     }
 
     @Override
@@ -48,6 +54,10 @@ public class TelegramChatbot implements Chatbot<Update> {
         Integer userIdInt = Integer.parseInt(userId);
         if (outMessage instanceof TextOutMessage) {
             MessageTo messageTo = mapper.toMessageTo(userIdInt, (TextOutMessage) outMessage);
+            feignTarget.sendMessage(messageTo);
+        }
+        if (outMessage instanceof BottomMenuOutMessage){
+            MessageTo messageTo = mapper.toMessageTo(userIdInt, (BottomMenuOutMessage) outMessage);
             feignTarget.sendMessage(messageTo);
         }
     }

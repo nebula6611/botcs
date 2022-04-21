@@ -3,8 +3,8 @@ package kz.botcs.point;
 import kz.botcs.*;
 import kz.botcs.builder.MessageBuilder;
 import kz.botcs.chatbot.InMessage;
-import kz.botcs.chatbot.OutMessage;
-import kz.botcs.chatbot.TextOutMessage;
+import kz.botcs.chatbot.outmessage.OutMessage;
+import kz.botcs.chatbot.outmessage.TextOutMessage;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
@@ -89,11 +89,11 @@ public class PointScanner {
                 }
                 outMessages.add((OutMessage) element);
             }
-            return new OutResponse(null, outMessages);
+            return new OutResponse(null, outMessages, null);
         } else if (result instanceof OutMessage) {
-            return new OutResponse(null, Collections.singletonList((OutMessage) result));
+            return new OutResponse(null, Collections.singletonList((OutMessage) result), null);
         } else if (result instanceof String) {
-            return new OutResponse(null, Collections.singletonList(new TextOutMessage(null, (String) result, null, null)));
+            return new OutResponse(null, Collections.singletonList(new TextOutMessage(null, (String) result, null)), null);
         }
         throw new IllegalStateException("return type is not correct");
     }

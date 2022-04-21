@@ -1,6 +1,8 @@
 package kz.botcs.chatbot;
 
 
+import kz.botcs.chatbot.outmessage.OutMessage;
+
 public interface Chatbot<I> {
 
     String getId();
