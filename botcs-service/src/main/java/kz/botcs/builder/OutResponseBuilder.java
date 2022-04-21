@@ -13,7 +13,6 @@ public class OutResponseBuilder {
     private final List<OutMessage> outMessages;
     private BottomMenuOutMessage bottomMenuOutMessage;
 
-
     public OutResponseBuilder() {
         this.outMessages = new ArrayList<>();
     }
@@ -37,25 +36,25 @@ public class OutResponseBuilder {
     }
 
     public class BottomMenuBuilder {
-        private final List<List<String>> buttons;
-        private List<String> buttonLine;
+        private final List<List<String>> map;
+        private List<String> line;
         private boolean resize;
         private boolean oneTime;
 
         public BottomMenuBuilder() {
-            this.buttons = new ArrayList<>();
-            this.buttonLine = new ArrayList<>();
+            this.map = new ArrayList<>();
+            this.line = new ArrayList<>();
         }
 
         public BottomMenuBuilder add(String title) {
-            buttonLine.add(title);
+            line.add(title);
             return this;
         }
 
         public BottomMenuBuilder addLineBrake() {
-            if (!buttonLine.isEmpty()) {
-                buttons.add(buttonLine);
-                buttonLine = new ArrayList<>();
+            if (!line.isEmpty()) {
+                map.add(line);
+                line = new ArrayList<>();
             }
             return this;
         }
@@ -71,10 +70,10 @@ public class OutResponseBuilder {
         }
 
         public OutResponseBuilder build() {
-            if (!buttonLine.isEmpty()) {
-                buttons.add(buttonLine);
+            if (!line.isEmpty()) {
+                map.add(line);
             }
-            OutResponseBuilder.this.bottomMenuOutMessage = new BottomMenuOutMessage(buttons, resize, oneTime);
+            OutResponseBuilder.this.bottomMenuOutMessage = new BottomMenuOutMessage(map, oneTime);
             return OutResponseBuilder.this;
         }
     }

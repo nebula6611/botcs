@@ -8,6 +8,7 @@ import kz.botcs.point.*;
 import kz.botcs.userdata.UserDataContainer;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -34,9 +35,12 @@ public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
 
             SystemUserData systemUserData = userData.get(SystemUserData.class);
             systemUserData.setStage(outResponse.getStage());
-            for (OutMessage outMessage : outResponse.getOutMessages()) {
-                chatbot.send(inMessage.getFrom().getId(), outMessage);
+
+            List<OutMessage> outMessages = new ArrayList<>(outResponse.getOutMessages());
+            if (outResponse.getBottomMenu() != null) {
+                outMessages.add(outResponse.getBottomMenu());
             }
+            chatbot.send(inMessage.getFrom().getId(), outMessages);
         };
     }
 

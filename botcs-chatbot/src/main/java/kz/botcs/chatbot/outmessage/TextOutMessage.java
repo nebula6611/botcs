@@ -1,16 +1,14 @@
 package kz.botcs.chatbot.outmessage;
 
-import java.util.List;
-
 public class TextOutMessage implements OutMessage {
     private final String id;
     private final String text;
-    private final List<List<Button>> buttons;
+    private final InlineButtonMarkup inlineButtonMarkup;
 
-    public TextOutMessage(String id, String text, List<List<Button>> buttons) {
+    public TextOutMessage(String id, String text, InlineButtonMarkup inlineButtonMarkup) {
         this.id = id;
         this.text = text;
-        this.buttons = buttons;
+        this.inlineButtonMarkup = inlineButtonMarkup;
     }
 
     public String getId() {
@@ -21,7 +19,7 @@ public class TextOutMessage implements OutMessage {
         return text;
     }
 
-    public List<List<Button>> getButtons() {
-        return buttons;
+    public InlineButtonMarkup getInlineButtonMarkup() {
+        return inlineButtonMarkup;
     }
 }

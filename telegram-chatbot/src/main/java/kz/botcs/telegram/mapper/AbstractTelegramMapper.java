@@ -1,9 +1,7 @@
 package kz.botcs.telegram.mapper;
 
 import kz.botcs.chatbot.*;
-import kz.botcs.chatbot.outmessage.BottomMenuOutMessage;
-import kz.botcs.chatbot.outmessage.Button;
-import kz.botcs.chatbot.outmessage.TextOutMessage;
+import kz.botcs.chatbot.outmessage.*;
 import kz.botcs.telegram.dto.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -30,14 +28,27 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     @Override
     @Mapping(target = "chatId", source = "userId")
     @Mapping(target = "text", source = "textOutMessage.text")
-    @Mapping(target = "replyMarkup", source = "textOutMessage")
+    @Mapping(target = "replyMarkup", source = "textOutMessage.inlineButtonMarkup")
     public abstract MessageTo toMessageTo(Integer userId, TextOutMessage textOutMessage);
 
     @Override
     @Mapping(target = "chatId", source = "userId")
-    @Mapping(target = "text", constant = "")
-    @Mapping(target = "replyMarkup", source = "bottomMenuOutMessage")
-    public abstract MessageTo toMessageTo(Integer userId, BottomMenuOutMessage bottomMenuOutMessage);
+    @Mapping(target = "messageId", source = "textOutMessage.id")
+    @Mapping(target = "text", source = "textOutMessage.text")
+    @Mapping(target = "replyMarkup", source = "textOutMessage.inlineButtonMarkup")
+    public abstract EditMessage toEditMessage(Integer userId, TextOutMessage textOutMessage);
+
+    @Override
+    @Mapping(target = "chatId", source = "userId")
+    @Mapping(target = "photoId", source = "photoOutMessage.photoId")
+    @Mapping(target = "replyMarkup", source = "photoOutMessage.inlineButtonMarkup")
+    public abstract Photo toPhoto(Integer userId, PhotoOutMessage photoOutMessage);
+
+    @Override
+    @Mapping(target = "resizeKeyboard", constant = "true")
+    @Mapping(target = "oneTimeKeyboard", source = "oneTime")
+    @Mapping(target = "keyboard", expression = "java(map(outMessage.getMap(),this::toKeyboardButton))")
+    public abstract ReplyKeyboardMarkup toReplyKeyboardMarkup(BottomMenuOutMessage outMessage);
 
     protected abstract TextInMessage toTextInMessage(Message message);
 
@@ -45,21 +56,16 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     @Mapping(target = "text", expression = "java(split(callbackQuery.getData())[1])")
     @Mapping(target = "callbackMessageId", source = "message.messageId")
     protected abstract CallbackInMessage toCallbackInMessage(CallbackQuery callbackQuery);
-
-    @Mapping(target = "inlineKeyboard", expression = "java(map(textOutMessage.getButtons(),this::toInlineKeyboardButton))")
-    protected abstract InlineKeyboardMarkup toInlineKeyboardMarkup(TextOutMessage textOutMessage);
-
-    @Mapping(target = "resizeKeyboard", source = "resize")
-    @Mapping(target = "oneTimeKeyboard", source = "oneTime")
-    @Mapping(target = "keyboard", expression = "java(map(outMessage.getButtons(),this::toKeyboardButton))")
-    protected abstract ReplyKeyboardMarkup toReplyKeyboardMarkup(BottomMenuOutMessage outMessage);
+    
+    @Mapping(target = "inlineKeyboard", expression = "java(map(inlineButtonMarkup.getMap(),this::toInlineKeyboardButton))")
+    protected abstract InlineKeyboardMarkup toInlineKeyboardMarkup(InlineButtonMarkup inlineButtonMarkup);
 
     @Mapping(target = "text", source = ".")
     protected abstract KeyboardButton toKeyboardButton(String title);
 
     @Mapping(target = "text", source = "title")
     @Mapping(target = "callbackData", expression = "java(button.getKeyword()+CALLBACK_DATA_SEPARATOR+button.getText())")
-    protected abstract InlineKeyboardButton toInlineKeyboardButton(Button button);
+    protected abstract InlineKeyboardButton toInlineKeyboardButton(InlineButton button);
 
     protected String[] split(String data) {
         return data.split(CALLBACK_DATA_SEPARATOR);

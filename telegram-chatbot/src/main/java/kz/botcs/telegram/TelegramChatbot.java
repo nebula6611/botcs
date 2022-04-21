@@ -8,12 +8,14 @@ import feign.okhttp.OkHttpClient;
 import kz.botcs.chatbot.*;
 import kz.botcs.chatbot.outmessage.BottomMenuOutMessage;
 import kz.botcs.chatbot.outmessage.OutMessage;
+import kz.botcs.chatbot.outmessage.PhotoOutMessage;
 import kz.botcs.chatbot.outmessage.TextOutMessage;
 import kz.botcs.telegram.dto.*;
 import kz.botcs.telegram.mapper.DefaultTelegramMapper;
 import kz.botcs.telegram.mapper.TelegramMapper;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TelegramChatbot implements Chatbot<Update> {
 
@@ -50,15 +52,54 @@ public class TelegramChatbot implements Chatbot<Update> {
     }
 
     @Override
-    public void send(String userId, OutMessage outMessage) {
+    public void send(String userId, List<OutMessage> outMessages) {
         Integer userIdInt = Integer.parseInt(userId);
-        if (outMessage instanceof TextOutMessage) {
-            MessageTo messageTo = mapper.toMessageTo(userIdInt, (TextOutMessage) outMessage);
+
+        final ReplyKeyboardMarkup replyKeyboardMarkup = outMessages.stream()
+                .filter(outMessage -> outMessage instanceof BottomMenuOutMessage)
+                .map(outMessage -> (BottomMenuOutMessage) outMessage)
+                .map(mapper::toReplyKeyboardMarkup)
+                .reduce((x, y) -> y).orElse(null);
+
+        List<MessageTo> messageTos = outMessages.stream()
+                .filter(outMessage -> outMessage instanceof TextOutMessage)
+                .map(outMessage -> (TextOutMessage) outMessage)
+                .filter(x -> x.getId() == null)
+                .map(x -> mapper.toMessageTo(userIdInt, x))
+                .map(x -> {
+                    if (x.getReplyMarkup() == null && replyKeyboardMarkup != null) {
+                        return ImmutableMessageTo.builder()
+                                .from(x).replyMarkup(replyKeyboardMarkup).build();
+                    } else {
+                        return x;
+                    }
+                }).collect(Collectors.toList());
+
+        List<EditMessage> editMessages = outMessages.stream()
+                .filter(outMessage -> outMessage instanceof TextOutMessage)
+                .map(outMessage -> (TextOutMessage) outMessage)
+                .filter(x -> x.getId() != null)
+                .map(x -> mapper.toEditMessage(userIdInt, x))
+                .collect(Collectors.toList());
+
+        List<Photo> photos = outMessages.stream()
+                .filter(outMessage -> outMessage instanceof PhotoOutMessage)
+                .map(outMessage -> (PhotoOutMessage) outMessage)
+                .map(x -> mapper.toPhoto(userIdInt, x))
+                .collect(Collectors.toList());
+
+        // ------------------------------------------------------
+
+        for (MessageTo messageTo : messageTos) {
             feignTarget.sendMessage(messageTo);
         }
-        if (outMessage instanceof BottomMenuOutMessage){
-            MessageTo messageTo = mapper.toMessageTo(userIdInt, (BottomMenuOutMessage) outMessage);
-            feignTarget.sendMessage(messageTo);
+
+        for (EditMessage editMessage : editMessages) {
+            feignTarget.editMessageText(editMessage);
+        }
+
+        for (Photo photo : photos) {
+            feignTarget.sendPhoto(photo);
         }
     }
 

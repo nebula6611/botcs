@@ -1,6 +1,7 @@
 package kz.botcs.builder;
 
-import kz.botcs.chatbot.outmessage.Button;
+import kz.botcs.chatbot.outmessage.InlineButton;
+import kz.botcs.chatbot.outmessage.InlineButtonMarkup;
 import kz.botcs.chatbot.outmessage.TextOutMessage;
 
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.List;
 public class TextOutMessageBuilder {
     private String id;
     private String text;
-    private List<List<Button>> buttons;
+    private InlineButtonMarkup inlineButtonMarkup;
 
     public TextOutMessageBuilder() {
     }
@@ -29,42 +30,42 @@ public class TextOutMessageBuilder {
     }
 
     public TextOutMessage build() {
-        return new TextOutMessage(id, text, buttons);
+        return new TextOutMessage(id, text, inlineButtonMarkup);
     }
 
 
     public class ButtonsBuilder {
-        private final List<List<Button>> buttons;
-        private List<Button> buttonLine;
+        private final List<List<InlineButton>> map;
+        private List<InlineButton> line;
 
         public ButtonsBuilder() {
-            this.buttons = new ArrayList<>();
-            this.buttonLine = new ArrayList<>();
+            this.map = new ArrayList<>();
+            this.line = new ArrayList<>();
         }
 
-        public ButtonsBuilder add(Button button) {
-            buttonLine.add(button);
+        public ButtonsBuilder add(InlineButton button) {
+            line.add(button);
             return this;
         }
 
         public ButtonsBuilder add(String title, String keyword, String text) {
-            add(new Button(title, keyword, text));
+            add(new InlineButton(title, keyword, text));
             return this;
         }
 
         public ButtonsBuilder addLineBrake() {
-            if (!buttonLine.isEmpty()) {
-                buttons.add(buttonLine);
-                buttonLine = new ArrayList<>();
+            if (!line.isEmpty()) {
+                map.add(line);
+                line = new ArrayList<>();
             }
             return this;
         }
 
         public TextOutMessageBuilder build() {
-            if (!buttonLine.isEmpty()) {
-                buttons.add(buttonLine);
+            if (!line.isEmpty()) {
+                map.add(line);
             }
-            TextOutMessageBuilder.this.buttons = buttons;
+            TextOutMessageBuilder.this.inlineButtonMarkup = new InlineButtonMarkup(map);
             return TextOutMessageBuilder.this;
         }
     }
