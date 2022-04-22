@@ -3,7 +3,7 @@ package kz.nebula.daim;
 import kz.botcs.InMessageHandler;
 import kz.botcs.InMessageHandlerFactory;
 import kz.botcs.telegram.TelegramChatbot;
-import kz.botcs.telegram.dto.Update;
+import kz.botcs.telegram.dto.in.Update;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;

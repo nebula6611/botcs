@@ -8,12 +8,13 @@ import feign.okhttp.OkHttpClient;
 import kz.botcs.chatbot.*;
 import kz.botcs.chatbot.outmessage.BottomMenuOutMessage;
 import kz.botcs.chatbot.outmessage.OutMessage;
-import kz.botcs.chatbot.outmessage.PhotoOutMessage;
 import kz.botcs.chatbot.outmessage.TextOutMessage;
-import kz.botcs.telegram.dto.*;
+import kz.botcs.telegram.dto.in.Update;
+import kz.botcs.telegram.dto.out.*;
 import kz.botcs.telegram.mapper.DefaultTelegramMapper;
 import kz.botcs.telegram.mapper.TelegramMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,8 +45,8 @@ public class TelegramChatbot implements Chatbot<Update> {
         InMessage inMessage = mapper.toInMessage(update);
         if (inMessage instanceof CallbackInMessage) {
             CallbackInMessage callbackInMessage = (CallbackInMessage) inMessage;
-            AnswerCallbackQuery answerCallbackQuery = ImmutableAnswerCallbackQuery.builder()
-                    .callbackQueryId(callbackInMessage.getId()).build();
+            AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery();
+            answerCallbackQuery.setCallbackQueryId(callbackInMessage.getId());
             feignTarget.answerCallbackQuery(answerCallbackQuery);
         }
         return inMessage;
@@ -61,45 +62,49 @@ public class TelegramChatbot implements Chatbot<Update> {
                 .map(mapper::toReplyKeyboardMarkup)
                 .reduce((x, y) -> y).orElse(null);
 
-        List<MessageTo> messageTos = outMessages.stream()
+        List<TextMessage> textMessages = outMessages.stream()
                 .filter(outMessage -> outMessage instanceof TextOutMessage)
                 .map(outMessage -> (TextOutMessage) outMessage)
                 .filter(x -> x.getId() == null)
                 .map(x -> mapper.toMessageTo(userIdInt, x))
-                .map(x -> {
-                    if (x.getReplyMarkup() == null && replyKeyboardMarkup != null) {
-                        return ImmutableMessageTo.builder()
-                                .from(x).replyMarkup(replyKeyboardMarkup).build();
-                    } else {
-                        return x;
-                    }
-                }).collect(Collectors.toList());
+                .peek(x -> setReplyKeyboardMarkup(x, replyKeyboardMarkup))
+                .collect(Collectors.toList());
 
         List<EditMessage> editMessages = outMessages.stream()
                 .filter(outMessage -> outMessage instanceof TextOutMessage)
                 .map(outMessage -> (TextOutMessage) outMessage)
                 .filter(x -> x.getId() != null)
                 .map(x -> mapper.toEditMessage(userIdInt, x))
+                .peek(x -> setReplyKeyboardMarkup(x, replyKeyboardMarkup))
                 .collect(Collectors.toList());
 
-        List<Photo> photos = outMessages.stream()
-                .filter(outMessage -> outMessage instanceof PhotoOutMessage)
-                .map(outMessage -> (PhotoOutMessage) outMessage)
+        List<PhotoMessage> photoMessages = outMessages.stream()
+                .filter(outMessage -> outMessage instanceof TextOutMessage)
+                .map(outMessage -> (TextOutMessage) outMessage)
+                .filter(x -> x.getId() == null)
+                .filter(x -> x.getPhotoId() != null)
                 .map(x -> mapper.toPhoto(userIdInt, x))
+                .peek(x -> setReplyKeyboardMarkup(x, replyKeyboardMarkup))
                 .collect(Collectors.toList());
 
         // ------------------------------------------------------
 
-        for (MessageTo messageTo : messageTos) {
-            feignTarget.sendMessage(messageTo);
+        for (TextMessage textMessage : textMessages) {
+            feignTarget.sendMessage(textMessage);
         }
 
         for (EditMessage editMessage : editMessages) {
             feignTarget.editMessageText(editMessage);
         }
 
-        for (Photo photo : photos) {
-            feignTarget.sendPhoto(photo);
+        for (PhotoMessage photoMessage : photoMessages) {
+            feignTarget.sendPhoto(photoMessage);
+        }
+    }
+
+    private void setReplyKeyboardMarkup(TextMessage textMessage, ReplyKeyboardMarkup replyKeyboardMarkup) {
+        if (textMessage.getReplyMarkup() != null) {
+            textMessage.setReplyMarkup(replyKeyboardMarkup);
         }
     }
 

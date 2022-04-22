@@ -1,9 +1,9 @@
 package kz.botcs;
 
+import kz.botcs.builder.ResponseBuilder;
 import kz.botcs.chatbot.Chatbot;
 import kz.botcs.chatbot.InMessage;
 import kz.botcs.chatbot.outmessage.OutMessage;
-import kz.botcs.chatbot.outmessage.TextOutMessage;
 import kz.botcs.point.*;
 import kz.botcs.userdata.UserDataContainer;
 import org.springframework.stereotype.Component;
@@ -31,17 +31,33 @@ public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
         return chatbotInMessage -> {
             InMessage inMessage = chatbot.toInMessage(chatbotInMessage);
             UserData userData = userDataContainer.get(chatbot.getId(), inMessage.getFrom().getId());
-            OutResponse outResponse = getResponse(chatbot.getId(), inMessage);
 
-            SystemUserData systemUserData = userData.get(SystemUserData.class);
-            systemUserData.setStage(outResponse.getStage());
+            List<OutResponse> outResponses = getResponses(chatbot.getId(), inMessage);
 
-            List<OutMessage> outMessages = new ArrayList<>(outResponse.getOutMessages());
-            if (outResponse.getBottomMenu() != null) {
-                outMessages.add(outResponse.getBottomMenu());
+            List<OutMessage> outMessages = new ArrayList<>();
+            for (OutResponse outResponse : outResponses) {
+                SystemUserData systemUserData = userData.get(SystemUserData.class);
+                systemUserData.setStage(outResponse.getStage());
+
+                outMessages.addAll(outResponse.getOutMessages());
+                if (outResponse.getBottomMenuOutMessage() != null) {
+                    outMessages.add(outResponse.getBottomMenuOutMessage());
+                }
             }
+
             chatbot.send(inMessage.getFrom().getId(), outMessages);
         };
+    }
+
+    private List<OutResponse> getResponses(String chatbotId, InMessage inMessage) {
+        List<OutResponse> outResponses = new ArrayList<>();
+        OutResponse outResponse = getResponse(chatbotId, inMessage);
+        while (true) {
+            outResponses.add(outResponse);
+            if (outResponse.getForward() == null) break;
+            outResponse = getResponse(chatbotId, inMessage, outResponse.getForward());
+        }
+        return outResponses;
     }
 
     private OutResponse getResponse(String chatbotId, InMessage inMessage) {
@@ -56,8 +72,21 @@ public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
             return point.execute(new PointArgs(text, inMessage));
         }
 
-        return new OutResponse(SystemUserData.STAGE_DEFAULT,
-                List.of(new TextOutMessage(null, "???", null)), null);
+        return ResponseBuilder.ofText("point not found").build();
+    }
+
+    private OutResponse getResponse(String chatbotId, InMessage inMessage, Forward forward) {
+
+        for (PointHandler<?> pointHandler : pointHandlerContainer.getPointHandlers()) {
+            if (pointHandler.getType() != forward.getType()) continue;
+            String keyword = forward.getKeyword();
+            String text = forward.getText();
+            Point point = pointContainer.get(chatbotId, keyword, pointHandler.getType());
+            if (point == null) continue;
+            return point.execute(new PointArgs(text, inMessage));
+        }
+
+        return ResponseBuilder.ofText("forward point not found").build();
     }
 
 

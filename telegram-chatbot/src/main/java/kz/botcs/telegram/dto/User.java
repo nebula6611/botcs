@@ -1,20 +1,40 @@
 package kz.botcs.telegram.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
+public class User implements RestDTO {
+    private Integer id;
+    private String firstName;
+    private String lastName;
+    private String username;
 
-@Value.Immutable
-@JsonDeserialize(builder = ImmutableUser.Builder.class)
-public interface User extends RestDTO {
-    Integer getId();
+    public Integer getId() {
+        return id;
+    }
 
-    @JsonProperty("first_name") String getFirstName();
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    @Nullable
-    @JsonProperty("last_name") String getLastName();
+    public String getFirstName() {
+        return firstName;
+    }
 
-    @Nullable
-    String getUsername();
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 }

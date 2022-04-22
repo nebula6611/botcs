@@ -10,6 +10,7 @@ import java.util.List;
 public class TextOutMessageBuilder {
     private String id;
     private String text;
+    private String photoId;
     private InlineButtonMarkup inlineButtonMarkup;
 
     public TextOutMessageBuilder() {
@@ -25,14 +26,18 @@ public class TextOutMessageBuilder {
         return this;
     }
 
-    public ButtonsBuilder buttons() {
-        return new ButtonsBuilder();
+    public TextOutMessageBuilder photoId(String photoId) {
+        this.photoId = photoId;
+        return this;
+    }
+
+    public TextOutMessageBuilder.ButtonsBuilder buttons() {
+        return new TextOutMessageBuilder.ButtonsBuilder();
     }
 
     public TextOutMessage build() {
-        return new TextOutMessage(id, text, inlineButtonMarkup);
+        return new TextOutMessage(id, text, photoId, inlineButtonMarkup);
     }
-
 
     public class ButtonsBuilder {
         private final List<List<InlineButton>> map;
@@ -43,17 +48,17 @@ public class TextOutMessageBuilder {
             this.line = new ArrayList<>();
         }
 
-        public ButtonsBuilder add(InlineButton button) {
+        public TextOutMessageBuilder.ButtonsBuilder add(InlineButton button) {
             line.add(button);
             return this;
         }
 
-        public ButtonsBuilder add(String title, String keyword, String text) {
+        public TextOutMessageBuilder.ButtonsBuilder add(String title, String keyword, String text) {
             add(new InlineButton(title, keyword, text));
             return this;
         }
 
-        public ButtonsBuilder addLineBrake() {
+        public TextOutMessageBuilder.ButtonsBuilder addLineBrake() {
             if (!line.isEmpty()) {
                 map.add(line);
                 line = new ArrayList<>();
@@ -61,7 +66,7 @@ public class TextOutMessageBuilder {
             return this;
         }
 
-        public TextOutMessageBuilder build() {
+        public TextOutMessageBuilder and() {
             if (!line.isEmpty()) {
                 map.add(line);
             }

@@ -2,7 +2,10 @@ package kz.botcs.telegram.mapper;
 
 import kz.botcs.chatbot.*;
 import kz.botcs.chatbot.outmessage.*;
-import kz.botcs.telegram.dto.*;
+import kz.botcs.telegram.dto.in.CallbackQuery;
+import kz.botcs.telegram.dto.in.Message;
+import kz.botcs.telegram.dto.in.Update;
+import kz.botcs.telegram.dto.out.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -29,7 +32,7 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     @Mapping(target = "chatId", source = "userId")
     @Mapping(target = "text", source = "textOutMessage.text")
     @Mapping(target = "replyMarkup", source = "textOutMessage.inlineButtonMarkup")
-    public abstract MessageTo toMessageTo(Integer userId, TextOutMessage textOutMessage);
+    public abstract TextMessage toMessageTo(Integer userId, TextOutMessage textOutMessage);
 
     @Override
     @Mapping(target = "chatId", source = "userId")
@@ -40,9 +43,10 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
 
     @Override
     @Mapping(target = "chatId", source = "userId")
-    @Mapping(target = "photoId", source = "photoOutMessage.photoId")
-    @Mapping(target = "replyMarkup", source = "photoOutMessage.inlineButtonMarkup")
-    public abstract Photo toPhoto(Integer userId, PhotoOutMessage photoOutMessage);
+    @Mapping(target = "photoId", source = "textOutMessage.photoId")
+    @Mapping(target = "text", source = "textOutMessage.text")
+    @Mapping(target = "replyMarkup", source = "textOutMessage.inlineButtonMarkup")
+    public abstract PhotoMessage toPhoto(Integer userId, TextOutMessage textOutMessage);
 
     @Override
     @Mapping(target = "resizeKeyboard", constant = "true")

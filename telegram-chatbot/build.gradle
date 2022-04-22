@@ -7,9 +7,6 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2.2'
     api project(':botcs-chatbot')
 
-    compileOnly 'org.immutables:value-annotations:2.9.0'
-    annotationProcessor 'org.immutables:value:2.9.0'
-
     implementation 'io.github.openfeign:feign-okhttp:11.8'
     implementation 'io.github.openfeign:feign-jackson:11.8'
     implementation 'io.github.openfeign:feign-slf4j:11.8'

@@ -1,16 +1,15 @@
 package kz.botcs.point;
 
-import kz.botcs.*;
-import kz.botcs.builder.MessageBuilder;
+import kz.botcs.ChatBotUser;
+import kz.botcs.OutResponse;
+import kz.botcs.builder.ResponseBuilder;
 import kz.botcs.chatbot.InMessage;
-import kz.botcs.chatbot.outmessage.OutMessage;
-import kz.botcs.chatbot.outmessage.TextOutMessage;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collection;
 
 
 @Component
@@ -40,13 +39,12 @@ public class PointScanner {
                         parameters[i] = getParameterForType(parameterTypes[i], args);
                     }
                     try {
-                        Object result = method.invoke(controller, parameters);
-                        return toOutResponse(result);
+                        return (OutResponse) method.invoke(controller, parameters);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         return errorOutResponse(e);
                     }
                 };
-                for (PointHandler pointHandler : pointHandlerContainer.getPointHandlers()) {
+                for (PointHandler<Annotation> pointHandler : pointHandlerContainer.getPointHandlers()) {
                     Annotation annotation = method.getAnnotation(pointHandler.getType());
                     if (annotation != null) {
                         String keyword = pointHandler.getKeyword(annotation);
@@ -59,9 +57,7 @@ public class PointScanner {
 
     private OutResponse errorOutResponse(Exception e) {
         e.printStackTrace();
-        return MessageBuilder.ofOutResponse().addMessage(
-                MessageBuilder.ofTextOutMessage().text("something went wrong").build()
-        ).build();
+        return ResponseBuilder.ofText("something went wrong").build();
     }
 
     private Object getParameterForType(Class<?> parameterType, PointArgs args) {
@@ -75,26 +71,5 @@ public class PointScanner {
             return args.getText();
         }
         throw new IllegalArgumentException("unknown type");
-    }
-
-    private OutResponse toOutResponse(Object result) {
-        if (result instanceof OutResponse) {
-            return (OutResponse) result;
-        } else if (result instanceof List) {
-            List<OutMessage> outMessages = new ArrayList<>();
-            List<?> list = (List<?>) result;
-            for (Object element : list) {
-                if (!(element instanceof OutMessage)) {
-                    throw new IllegalStateException("return type is not correct");
-                }
-                outMessages.add((OutMessage) element);
-            }
-            return new OutResponse(null, outMessages, null);
-        } else if (result instanceof OutMessage) {
-            return new OutResponse(null, Collections.singletonList((OutMessage) result), null);
-        } else if (result instanceof String) {
-            return new OutResponse(null, Collections.singletonList(new TextOutMessage(null, (String) result, null)), null);
-        }
-        throw new IllegalStateException("return type is not correct");
     }
 }

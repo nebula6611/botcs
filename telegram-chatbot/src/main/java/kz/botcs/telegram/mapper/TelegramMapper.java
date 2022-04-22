@@ -2,19 +2,21 @@ package kz.botcs.telegram.mapper;
 
 import kz.botcs.chatbot.InMessage;
 import kz.botcs.chatbot.outmessage.BottomMenuOutMessage;
-import kz.botcs.chatbot.outmessage.PhotoOutMessage;
 import kz.botcs.chatbot.outmessage.TextOutMessage;
-import kz.botcs.telegram.dto.*;
-import org.mapstruct.Mapping;
+import kz.botcs.telegram.dto.in.Update;
+import kz.botcs.telegram.dto.out.EditMessage;
+import kz.botcs.telegram.dto.out.TextMessage;
+import kz.botcs.telegram.dto.out.PhotoMessage;
+import kz.botcs.telegram.dto.out.ReplyKeyboardMarkup;
 
 public interface TelegramMapper {
     InMessage toInMessage(Update update);
 
-    MessageTo toMessageTo(Integer userIdInt, TextOutMessage outMessage);
+    TextMessage toMessageTo(Integer userIdInt, TextOutMessage outMessage);
 
     EditMessage toEditMessage(Integer userId, TextOutMessage textOutMessage);
 
-    Photo toPhoto(Integer userId, PhotoOutMessage photoOutMessage);
+    PhotoMessage toPhoto(Integer userId, TextOutMessage textOutMessage);
 
     ReplyKeyboardMarkup toReplyKeyboardMarkup(BottomMenuOutMessage outMessage);
 

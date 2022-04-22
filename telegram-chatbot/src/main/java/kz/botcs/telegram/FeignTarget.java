@@ -3,7 +3,8 @@ package kz.botcs.telegram;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import kz.botcs.telegram.dto.*;
+import kz.botcs.telegram.dto.in.UpdateResult;
+import kz.botcs.telegram.dto.out.*;
 
 public interface FeignTarget {
     @RequestLine("GET /getUpdates?offset={offset}")
@@ -11,7 +12,7 @@ public interface FeignTarget {
 
     @RequestLine("POST /sendMessage")
     @Headers("Content-Type: application/json")
-    void sendMessage(MessageTo messageTo);
+    void sendMessage(TextMessage textMessage);
 
     @RequestLine("POST /editMessageText")
     @Headers("Content-Type: application/json")
@@ -23,11 +24,7 @@ public interface FeignTarget {
 
     @RequestLine("POST /sendPhoto")
     @Headers("Content-Type: application/json")
-    void sendPhoto(Photo photo);
-
-    @RequestLine("POST /setMyCommands")
-    @Headers("Content-Type: application/json")
-    void setMyCommands(BotCommands botCommands);
+    void sendPhoto(PhotoMessage photoMessage);
 
     @RequestLine("POST /setWebhook")
     @Headers("Content-Type: application/json")
