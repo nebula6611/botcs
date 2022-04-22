@@ -10,15 +10,15 @@ import java.util.List;
 
 @Component
 public class PointHandlerContainer {
-    private final List<PointHandler<Annotation>> pointHandlers;
+    private final List<PointHandler<? extends Annotation>> pointHandlers;
 
-    public PointHandlerContainer(List<PointHandler<Annotation>> pointHandlers) {
-        List<PointHandler<Annotation>> list = new ArrayList<>(pointHandlers);
+    public PointHandlerContainer(List<PointHandler<? extends Annotation>> pointHandlers) {
+        List<PointHandler<? extends Annotation>> list = new ArrayList<>(pointHandlers);
         list.sort(Comparator.comparing(PointHandler::getOrder));
         this.pointHandlers = Collections.unmodifiableList(list);
     }
 
-    public List<PointHandler<Annotation>> getPointHandlers() {
+    public List<PointHandler<? extends Annotation>> getPointHandlers() {
         return pointHandlers;
     }
 }

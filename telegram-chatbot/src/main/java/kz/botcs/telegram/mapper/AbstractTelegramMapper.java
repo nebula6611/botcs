@@ -1,13 +1,20 @@
 package kz.botcs.telegram.mapper;
 
-import kz.botcs.chatbot.*;
-import kz.botcs.chatbot.outmessage.*;
+import kz.botcs.chatbot.CallbackInMessage;
+import kz.botcs.chatbot.InMessage;
+import kz.botcs.chatbot.TextInMessage;
+import kz.botcs.chatbot.outmessage.BottomMenuOutMessage;
+import kz.botcs.chatbot.outmessage.InlineButton;
+import kz.botcs.chatbot.outmessage.InlineButtonMarkup;
+import kz.botcs.chatbot.outmessage.TextOutMessage;
 import kz.botcs.telegram.dto.in.CallbackQuery;
 import kz.botcs.telegram.dto.in.Message;
+import kz.botcs.telegram.dto.in.PhotoSize;
 import kz.botcs.telegram.dto.in.Update;
 import kz.botcs.telegram.dto.out.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import java.util.List;
 import java.util.function.Function;
@@ -30,22 +37,18 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
 
     @Override
     @Mapping(target = "chatId", source = "userId")
-    @Mapping(target = "text", source = "textOutMessage.text")
+    @Mapping(target = "messageId", source = "textOutMessage.id")
     @Mapping(target = "replyMarkup", source = "textOutMessage.inlineButtonMarkup")
+    @Mapping(target = "text", source = "textOutMessage.text")
     public abstract TextMessage toMessageTo(Integer userId, TextOutMessage textOutMessage);
+
 
     @Override
     @Mapping(target = "chatId", source = "userId")
     @Mapping(target = "messageId", source = "textOutMessage.id")
-    @Mapping(target = "text", source = "textOutMessage.text")
     @Mapping(target = "replyMarkup", source = "textOutMessage.inlineButtonMarkup")
-    public abstract EditMessage toEditMessage(Integer userId, TextOutMessage textOutMessage);
-
-    @Override
-    @Mapping(target = "chatId", source = "userId")
-    @Mapping(target = "photoId", source = "textOutMessage.photoId")
-    @Mapping(target = "text", source = "textOutMessage.text")
-    @Mapping(target = "replyMarkup", source = "textOutMessage.inlineButtonMarkup")
+    @Mapping(target = "photo", source = "textOutMessage.photoId")
+    @Mapping(target = "caption", source = "textOutMessage.text")
     public abstract PhotoMessage toPhoto(Integer userId, TextOutMessage textOutMessage);
 
     @Override
@@ -54,13 +57,31 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     @Mapping(target = "keyboard", expression = "java(map(outMessage.getMap(),this::toKeyboardButton))")
     public abstract ReplyKeyboardMarkup toReplyKeyboardMarkup(BottomMenuOutMessage outMessage);
 
+    @Mapping(target = "photoId", source = "photo")
     protected abstract TextInMessage toTextInMessage(Message message);
 
-    @Mapping(target = "keyword", expression = "java(split(callbackQuery.getData())[0])")
-    @Mapping(target = "text", expression = "java(split(callbackQuery.getData())[1])")
+    protected String toPhotoId(List<PhotoSize> photo) {
+        if (photo == null) return null;
+        return photo.get(0).getFileId();
+    }
+
+    @Mapping(target = "keyword", source = "data", qualifiedByName = "toKeyword")
+    @Mapping(target = "text", source = "data", qualifiedByName = "toText")
     @Mapping(target = "callbackMessageId", source = "message.messageId")
     protected abstract CallbackInMessage toCallbackInMessage(CallbackQuery callbackQuery);
-    
+
+    @Named("toKeyword")
+    protected String toKeyword(String data) {
+        return data.split(CALLBACK_DATA_SEPARATOR)[0];
+    }
+
+    @Named("toText")
+    protected String toText(String data) {
+        String[] array = data.split(CALLBACK_DATA_SEPARATOR);
+        if (array.length < 2) return null;
+        return array[1];
+    }
+
     @Mapping(target = "inlineKeyboard", expression = "java(map(inlineButtonMarkup.getMap(),this::toInlineKeyboardButton))")
     protected abstract InlineKeyboardMarkup toInlineKeyboardMarkup(InlineButtonMarkup inlineButtonMarkup);
 
@@ -70,10 +91,6 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     @Mapping(target = "text", source = "title")
     @Mapping(target = "callbackData", expression = "java(button.getKeyword()+CALLBACK_DATA_SEPARATOR+button.getText())")
     protected abstract InlineKeyboardButton toInlineKeyboardButton(InlineButton button);
-
-    protected String[] split(String data) {
-        return data.split(CALLBACK_DATA_SEPARATOR);
-    }
 
     protected <V, T> List<List<T>> map(List<List<V>> vs, Function<V, T> converter) {
         if (vs == null) return null;

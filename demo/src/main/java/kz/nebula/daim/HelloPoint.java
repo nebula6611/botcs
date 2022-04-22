@@ -10,27 +10,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-//@PointController(DaimClient.ID)
+@PointController(chatbotId = DaimClient.ID)
 public class HelloPoint {
 
     @CommandPoint(DaimClient.Command.START)
     public OutResponse start() {
-//        List<Word> words = new ArrayList<>(wordService.findAll());
-//        if (words.size() < 4) {
-//            return ResponseBuilder.ofText("too few words").build();
-//        }
-//        Collections.shuffle(words, RANDOM);
-//        Word word = words.get(RANDOM.nextInt(4));
-//        userData.put("WORD_ID", word.getId());
-//
-//        return ResponseBuilder.of()
-//                .newMessage()
-//                .add()
-//                .bottomMenu().add("Archived").addLineBrake()
-//                .add()
-//                .forwardCommand("sadasdas")
-//                .build();
-        return null;
+        return ResponseBuilder.of().newMessage()
+                .text("Hello World").buttons()
+                .add("dasdas", "sadasdas", "dasdas")
+                .end().add().build();
     }
 
     @DefaultTextPoint

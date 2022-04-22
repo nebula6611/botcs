@@ -4,7 +4,6 @@ import kz.botcs.chatbot.InMessage;
 import kz.botcs.chatbot.outmessage.BottomMenuOutMessage;
 import kz.botcs.chatbot.outmessage.TextOutMessage;
 import kz.botcs.telegram.dto.in.Update;
-import kz.botcs.telegram.dto.out.EditMessage;
 import kz.botcs.telegram.dto.out.TextMessage;
 import kz.botcs.telegram.dto.out.PhotoMessage;
 import kz.botcs.telegram.dto.out.ReplyKeyboardMarkup;
@@ -13,8 +12,6 @@ public interface TelegramMapper {
     InMessage toInMessage(Update update);
 
     TextMessage toMessageTo(Integer userIdInt, TextOutMessage outMessage);
-
-    EditMessage toEditMessage(Integer userId, TextOutMessage textOutMessage);
 
     PhotoMessage toPhoto(Integer userId, TextOutMessage textOutMessage);
 

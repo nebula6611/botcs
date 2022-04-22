@@ -16,15 +16,19 @@ public interface FeignTarget {
 
     @RequestLine("POST /editMessageText")
     @Headers("Content-Type: application/json")
-    void editMessageText(EditMessage editMessage);
-
-    @RequestLine("POST /answerCallbackQuery")
-    @Headers("Content-Type: application/json")
-    void answerCallbackQuery(AnswerCallbackQuery answerCallbackQuery);
+    void editMessageText(TextMessage textMessage);
 
     @RequestLine("POST /sendPhoto")
     @Headers("Content-Type: application/json")
     void sendPhoto(PhotoMessage photoMessage);
+
+    @RequestLine("POST /editMessageCaption")
+    @Headers("Content-Type: application/json")
+    void editMessageCaption(PhotoMessage photoMessage);
+
+    @RequestLine("POST /answerCallbackQuery")
+    @Headers("Content-Type: application/json")
+    void answerCallbackQuery(AnswerCallbackQuery answerCallbackQuery);
 
     @RequestLine("POST /setWebhook")
     @Headers("Content-Type: application/json")

@@ -2,13 +2,20 @@ package kz.botcs.point;
 
 import kz.botcs.ChatBotUser;
 import kz.botcs.OutResponse;
+import kz.botcs.UserData;
 import kz.botcs.builder.ResponseBuilder;
+import kz.botcs.chatbot.CallbackInMessage;
 import kz.botcs.chatbot.InMessage;
+import kz.botcs.chatbot.TextInMessage;
+import kz.botcs.point.para.CallbackMessageId;
+import kz.botcs.point.para.PhotoId;
+import kz.botcs.userdata.UserDataContainer;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 
 
@@ -17,26 +24,32 @@ public class PointScanner {
 
     private final PointContainer pointContainer;
     private final PointHandlerContainer pointHandlerContainer;
+    private final UserDataContainer userDataContainer;
 
     public PointScanner(
             PointContainer pointContainer,
-            PointHandlerContainer pointHandlerContainer) {
+            PointHandlerContainer pointHandlerContainer, UserDataContainer userDataContainer) {
         this.pointContainer = pointContainer;
         this.pointHandlerContainer = pointHandlerContainer;
+        this.userDataContainer = userDataContainer;
     }
 
     public void scan(Collection<Object> controllers) {
         for (Object controller : controllers) {
             Class<?> controllerType = controller.getClass();
             PointController controllerAnnotation = controllerType.getAnnotation(PointController.class);
-            String chatbotId = controllerAnnotation.value();
+            String chatbotId = controllerAnnotation.chatbotId();
             for (Method method : controllerType.getMethods()) {
                 Point point = args -> {
                     int parameterCount = method.getParameterCount();
                     Class<?>[] parameterTypes = method.getParameterTypes();
+                    Annotation[][] annotations = method.getParameterAnnotations();
                     Object[] parameters = new Object[parameterCount];
                     for (int i = 0; i < parameterCount; i++) {
-                        parameters[i] = getParameterForType(parameterTypes[i], args);
+                        parameters[i] = getParameterForType(
+                                parameterTypes[i],
+                                Arrays.stream(annotations[i]).findFirst().orElse(null),
+                                args);
                     }
                     try {
                         return (OutResponse) method.invoke(controller, parameters);
@@ -44,7 +57,7 @@ public class PointScanner {
                         return errorOutResponse(e);
                     }
                 };
-                for (PointHandler<Annotation> pointHandler : pointHandlerContainer.getPointHandlers()) {
+                for (PointHandler pointHandler : pointHandlerContainer.getPointHandlers()) {
                     Annotation annotation = method.getAnnotation(pointHandler.getType());
                     if (annotation != null) {
                         String keyword = pointHandler.getKeyword(annotation);
@@ -60,16 +73,36 @@ public class PointScanner {
         return ResponseBuilder.ofText("something went wrong").build();
     }
 
-    private Object getParameterForType(Class<?> parameterType, PointArgs args) {
+    private Object getParameterForType(
+            Class<?> parameterType,
+            Annotation annotation,
+            PointArgs args) {
         if (parameterType.equals(ChatBotUser.class)) {
             return args.getInMessage().getFrom();
+        }
+        if (parameterType.equals(UserData.class)) {
+            return userDataContainer.get(args.getChatbotId(), args.getInMessage().getFrom().getId());
         }
         if (parameterType.equals(InMessage.class)) {
             return args.getInMessage();
         }
         if (parameterType.equals(String.class)) {
+            if (annotation instanceof CallbackMessageId) {
+                if (args.getInMessage() instanceof CallbackInMessage) {
+                    CallbackInMessage callbackInMessage = (CallbackInMessage) args.getInMessage();
+                    return callbackInMessage.getCallbackMessageId();
+                }
+                return null;
+            }
+            if (annotation instanceof PhotoId) {
+                if (args.getInMessage() instanceof TextInMessage) {
+                    TextInMessage textInMessage = (TextInMessage) args.getInMessage();
+                    return textInMessage.getPhotoId();
+                }
+                return null;
+            }
             return args.getText();
         }
-        throw new IllegalArgumentException("unknown type");
+        throw new IllegalArgumentException("unknown type: " + parameterType.getName());
     }
 }

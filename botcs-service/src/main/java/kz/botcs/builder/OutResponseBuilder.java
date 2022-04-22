@@ -112,6 +112,10 @@ public class OutResponseBuilder {
                 return this;
             }
 
+            public ButtonsBuilder add(String title, String keyword) {
+                return add(title, keyword, null);
+            }
+
             public ButtonsBuilder addLineBrake() {
                 if (!line.isEmpty()) {
                     map.add(line);

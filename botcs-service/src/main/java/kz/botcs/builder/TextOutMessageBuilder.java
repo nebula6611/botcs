@@ -58,6 +58,11 @@ public class TextOutMessageBuilder {
             return this;
         }
 
+        public TextOutMessageBuilder.ButtonsBuilder add(String title, String keyword) {
+            return add(title, keyword, null);
+        }
+
+
         public TextOutMessageBuilder.ButtonsBuilder addLineBrake() {
             if (!line.isEmpty()) {
                 map.add(line);

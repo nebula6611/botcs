@@ -13,6 +13,7 @@ import kz.botcs.telegram.dto.in.Update;
 import kz.botcs.telegram.dto.out.*;
 import kz.botcs.telegram.mapper.DefaultTelegramMapper;
 import kz.botcs.telegram.mapper.TelegramMapper;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,23 +66,14 @@ public class TelegramChatbot implements Chatbot<Update> {
         List<TextMessage> textMessages = outMessages.stream()
                 .filter(outMessage -> outMessage instanceof TextOutMessage)
                 .map(outMessage -> (TextOutMessage) outMessage)
-                .filter(x -> x.getId() == null)
+                .filter(x -> x.getPhotoId() == null)
                 .map(x -> mapper.toMessageTo(userIdInt, x))
-                .peek(x -> setReplyKeyboardMarkup(x, replyKeyboardMarkup))
-                .collect(Collectors.toList());
-
-        List<EditMessage> editMessages = outMessages.stream()
-                .filter(outMessage -> outMessage instanceof TextOutMessage)
-                .map(outMessage -> (TextOutMessage) outMessage)
-                .filter(x -> x.getId() != null)
-                .map(x -> mapper.toEditMessage(userIdInt, x))
                 .peek(x -> setReplyKeyboardMarkup(x, replyKeyboardMarkup))
                 .collect(Collectors.toList());
 
         List<PhotoMessage> photoMessages = outMessages.stream()
                 .filter(outMessage -> outMessage instanceof TextOutMessage)
                 .map(outMessage -> (TextOutMessage) outMessage)
-                .filter(x -> x.getId() == null)
                 .filter(x -> x.getPhotoId() != null)
                 .map(x -> mapper.toPhoto(userIdInt, x))
                 .peek(x -> setReplyKeyboardMarkup(x, replyKeyboardMarkup))
@@ -90,20 +82,18 @@ public class TelegramChatbot implements Chatbot<Update> {
         // ------------------------------------------------------
 
         for (TextMessage textMessage : textMessages) {
-            feignTarget.sendMessage(textMessage);
-        }
-
-        for (EditMessage editMessage : editMessages) {
-            feignTarget.editMessageText(editMessage);
+            if (textMessage.getMessageId() == null) feignTarget.sendMessage(textMessage);
+            else feignTarget.editMessageText(textMessage);
         }
 
         for (PhotoMessage photoMessage : photoMessages) {
-            feignTarget.sendPhoto(photoMessage);
+            if (photoMessage.getMessageId() == null) feignTarget.sendPhoto(photoMessage);
+            else feignTarget.editMessageCaption(photoMessage);
         }
     }
 
-    private void setReplyKeyboardMarkup(TextMessage textMessage, ReplyKeyboardMarkup replyKeyboardMarkup) {
-        if (textMessage.getReplyMarkup() != null) {
+    private void setReplyKeyboardMarkup(kz.botcs.telegram.dto.out.OutMessage textMessage, ReplyKeyboardMarkup replyKeyboardMarkup) {
+        if (textMessage.getReplyMarkup() == null) {
             textMessage.setReplyMarkup(replyKeyboardMarkup);
         }
     }

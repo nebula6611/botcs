@@ -1,15 +1,11 @@
-package kz.botcs.point;
-
-import org.springframework.stereotype.Component;
+package kz.botcs.point.para;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.TYPE})
+@Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-@Component
-public @interface PointController {
-    String chatbotId();
+public @interface CallbackMessageId {
 }
