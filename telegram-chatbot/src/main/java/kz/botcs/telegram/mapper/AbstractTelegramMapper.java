@@ -98,4 +98,9 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
                 .map(x -> x.stream().map(converter).collect(Collectors.toList()))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Mapping(target = "url", source = ".")
+    public abstract Webhook toWebhook(String webhookUrl);
+
 }

@@ -3,5 +3,3 @@ include 'botcs-chatbot'
 include 'botcs-service'
 include 'botcs-starter'
 include 'telegram-chatbot'
-include 'demo'
-

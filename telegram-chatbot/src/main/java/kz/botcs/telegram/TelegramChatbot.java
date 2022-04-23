@@ -5,17 +5,20 @@ import feign.Logger;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.okhttp.OkHttpClient;
-import kz.botcs.chatbot.*;
+import kz.botcs.chatbot.CallbackInMessage;
+import kz.botcs.chatbot.Chatbot;
+import kz.botcs.chatbot.InMessage;
 import kz.botcs.chatbot.outmessage.BottomMenuOutMessage;
 import kz.botcs.chatbot.outmessage.OutMessage;
 import kz.botcs.chatbot.outmessage.TextOutMessage;
 import kz.botcs.telegram.dto.in.Update;
-import kz.botcs.telegram.dto.out.*;
+import kz.botcs.telegram.dto.out.AnswerCallbackQuery;
+import kz.botcs.telegram.dto.out.PhotoMessage;
+import kz.botcs.telegram.dto.out.ReplyKeyboardMarkup;
+import kz.botcs.telegram.dto.out.TextMessage;
 import kz.botcs.telegram.mapper.DefaultTelegramMapper;
 import kz.botcs.telegram.mapper.TelegramMapper;
-import org.w3c.dom.Text;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,14 +28,14 @@ public class TelegramChatbot implements Chatbot<Update> {
     private final FeignTarget feignTarget;
     private final TelegramMapper mapper;
 
-    public TelegramChatbot(String id, String url) {
+    public TelegramChatbot(String id, String token) {
         this.id = id;
         this.feignTarget = Feign.builder()
                 .client(new OkHttpClient())
                 .encoder(new JacksonEncoder())
                 .decoder(new JacksonDecoder())
                 .logLevel(Logger.Level.BASIC)
-                .target(FeignTarget.class, url);
+                .target(FeignTarget.class, "https://api.telegram.org/bot" + token);
         this.mapper = new DefaultTelegramMapper();
     }
 
@@ -102,8 +105,14 @@ public class TelegramChatbot implements Chatbot<Update> {
         return feignTarget.getUpdates(offset).getResult();
     }
 
+
+    public void setWebhook(String url) {
+        this.feignTarget.setWebhook(mapper.toWebhook(url));
+    }
+
     public void deleteWebhook() {
         feignTarget.deleteWebhook();
     }
+
 
 }

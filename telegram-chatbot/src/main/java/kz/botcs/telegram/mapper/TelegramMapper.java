@@ -7,6 +7,7 @@ import kz.botcs.telegram.dto.in.Update;
 import kz.botcs.telegram.dto.out.TextMessage;
 import kz.botcs.telegram.dto.out.PhotoMessage;
 import kz.botcs.telegram.dto.out.ReplyKeyboardMarkup;
+import kz.botcs.telegram.dto.out.Webhook;
 
 public interface TelegramMapper {
     InMessage toInMessage(Update update);
@@ -17,4 +18,5 @@ public interface TelegramMapper {
 
     ReplyKeyboardMarkup toReplyKeyboardMarkup(BottomMenuOutMessage outMessage);
 
+    Webhook toWebhook(String webhookUrl);
 }
