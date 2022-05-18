@@ -11,6 +11,7 @@ import kz.botcs.point.para.PhotoId;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -52,7 +53,8 @@ public class PointScanner {
                                 args);
                     }
                     try {
-                        Object controller = context.getBean(controllerType);
+                        String beanName = ClassUtils.getShortNameAsProperty(controllerType);
+                        Object controller = context.getBean(beanName);
                         return (OutResponse) method.invoke(controller, parameters);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         return errorOutResponse(e);
