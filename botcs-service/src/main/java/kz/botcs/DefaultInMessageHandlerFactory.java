@@ -5,7 +5,7 @@ import kz.botcs.chatbot.Chatbot;
 import kz.botcs.chatbot.InMessage;
 import kz.botcs.chatbot.outmessage.OutMessage;
 import kz.botcs.point.*;
-import kz.botcs.userdata.UserDataContainer;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,16 +13,16 @@ import java.util.List;
 
 @Component
 public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
+    private final ObjectProvider<UserData> userDataProvider;
     private final PointContainer pointContainer;
-    private final UserDataContainer userDataContainer;
     private final PointHandlerContainer pointHandlerContainer;
 
     public DefaultInMessageHandlerFactory(
+            ObjectProvider<UserData> userDataProvider,
             PointContainer pointContainer,
-            UserDataContainer userDataContainer,
             PointHandlerContainer pointHandlerContainer) {
+        this.userDataProvider = userDataProvider;
         this.pointContainer = pointContainer;
-        this.userDataContainer = userDataContainer;
         this.pointHandlerContainer = pointHandlerContainer;
     }
 
@@ -30,14 +30,14 @@ public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
     public <C extends Chatbot<I>, I> InMessageHandler<I> createHandler(C chatbot) {
         return chatbotInMessage -> {
             InMessage inMessage = chatbot.toInMessage(chatbotInMessage);
-            UserData userData = userDataContainer.get(chatbot.getId(), inMessage.getFrom().getId());
+            UserIdThreadLocal.set(inMessage.getFrom().getId());
 
+            UserData userData = userDataProvider.getObject();
             List<OutResponse> outResponses = getResponses(chatbot.getId(), inMessage);
 
             List<OutMessage> outMessages = new ArrayList<>();
             for (OutResponse outResponse : outResponses) {
-                SystemUserData systemUserData = userData.get(SystemUserData.class);
-                systemUserData.setStage(outResponse.getStage());
+                userData.setStage(outResponse.getStage());
 
                 outMessages.addAll(outResponse.getOutMessages());
                 if (outResponse.getBottomMenuOutMessage() != null) {
@@ -46,6 +46,7 @@ public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
             }
 
             chatbot.send(inMessage.getFrom().getId(), outMessages);
+            UserIdThreadLocal.clear();
         };
     }
 

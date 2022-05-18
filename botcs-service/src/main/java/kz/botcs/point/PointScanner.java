@@ -2,14 +2,14 @@ package kz.botcs.point;
 
 import kz.botcs.ChatBotUser;
 import kz.botcs.OutResponse;
-import kz.botcs.UserData;
 import kz.botcs.builder.ResponseBuilder;
 import kz.botcs.chatbot.CallbackInMessage;
 import kz.botcs.chatbot.InMessage;
 import kz.botcs.chatbot.TextInMessage;
 import kz.botcs.point.para.CallbackMessageId;
 import kz.botcs.point.para.PhotoId;
-import kz.botcs.userdata.UserDataContainer;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
@@ -24,19 +24,19 @@ public class PointScanner {
 
     private final PointContainer pointContainer;
     private final PointHandlerContainer pointHandlerContainer;
-    private final UserDataContainer userDataContainer;
+    private final ApplicationContext context;
 
     public PointScanner(
             PointContainer pointContainer,
-            PointHandlerContainer pointHandlerContainer, UserDataContainer userDataContainer) {
+            PointHandlerContainer pointHandlerContainer,
+            ConfigurableApplicationContext context) {
         this.pointContainer = pointContainer;
         this.pointHandlerContainer = pointHandlerContainer;
-        this.userDataContainer = userDataContainer;
+        this.context = context;
     }
 
-    public void scan(Collection<Object> controllers) {
-        for (Object controller : controllers) {
-            Class<?> controllerType = controller.getClass();
+    public void scan(Collection<Class<?>> controllerTypes) {
+        for (Class<?> controllerType : controllerTypes) {
             PointController controllerAnnotation = controllerType.getAnnotation(PointController.class);
             String chatbotId = controllerAnnotation.chatbotId();
             for (Method method : controllerType.getMethods()) {
@@ -52,6 +52,7 @@ public class PointScanner {
                                 args);
                     }
                     try {
+                        Object controller = context.getBean(controllerType);
                         return (OutResponse) method.invoke(controller, parameters);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         return errorOutResponse(e);
@@ -79,9 +80,6 @@ public class PointScanner {
             PointArgs args) {
         if (parameterType.equals(ChatBotUser.class)) {
             return args.getInMessage().getFrom();
-        }
-        if (parameterType.equals(UserData.class)) {
-            return userDataContainer.get(args.getChatbotId(), args.getInMessage().getFrom().getId());
         }
         if (parameterType.equals(InMessage.class)) {
             return args.getInMessage();

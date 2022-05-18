@@ -1,12 +1,19 @@
 package kz.botcs;
 
 import kz.botcs.point.PointController;
+import kz.botcs.point.PointScan;
 import kz.botcs.point.PointScanner;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class PointScannerLoader {
@@ -18,9 +25,22 @@ public class PointScannerLoader {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void onReady(ApplicationReadyEvent event) {
-        Collection<Object> controllers = event.getApplicationContext()
-                .getBeansWithAnnotation(PointController.class).values();
-        pointScanner.scan(controllers);
+    public void onReady(ApplicationReadyEvent event) throws Exception {
+        ApplicationContext context = event.getApplicationContext();
+        List<String> classNames = context.getBeansWithAnnotation(PointScan.class)
+                .values().stream()
+                .map(Object::getClass).map(Class::getPackageName)
+                .distinct().collect(Collectors.toList());
+        List<Class<?>> result = new ArrayList<>();
+        for (String className : classNames) {
+            ClassPathScanningCandidateComponentProvider scanner =
+                    new ClassPathScanningCandidateComponentProvider(false);
+            scanner.addIncludeFilter(new AnnotationTypeFilter(PointController.class));
+            for (BeanDefinition beanDefinition : scanner.findCandidateComponents(className)) {
+                Class<?> aClass = Class.forName(beanDefinition.getBeanClassName());
+                result.add(aClass);
+            }
+        }
+        pointScanner.scan(result);
     }
 }
