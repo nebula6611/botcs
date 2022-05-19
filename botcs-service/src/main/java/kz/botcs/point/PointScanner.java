@@ -53,8 +53,7 @@ public class PointScanner {
                                 args);
                     }
                     try {
-                        String beanName = ClassUtils.getShortNameAsProperty(controllerType);
-                        Object controller = context.getBean(beanName);
+                        Object controller = context.getBean(controllerType);
                         return (OutResponse) method.invoke(controller, parameters);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         return errorOutResponse(e);

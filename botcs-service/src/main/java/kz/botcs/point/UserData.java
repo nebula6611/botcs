@@ -1,12 +1,13 @@
 package kz.botcs.point;
 
+import kz.botcs.CustomScope;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 @Component
-@Scope("point")
+@Scope(CustomScope.POINT_SCOPE)
 public class UserData {
     public final static String STAGE_DEFAULT = "STAGE_DEFAULT";
 

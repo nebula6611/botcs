@@ -1,5 +1,6 @@
 package kz.botcs.point;
 
+import kz.botcs.CustomScope;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -10,6 +11,6 @@ public class PointBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory factory) throws BeansException {
-        factory.registerScope("point", new PointScope());
+        factory.registerScope(CustomScope.POINT_SCOPE, new PointScope());
     }
 }

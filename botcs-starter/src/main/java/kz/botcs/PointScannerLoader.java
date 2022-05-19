@@ -10,6 +10,7 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.context.event.EventListener;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,9 @@ public class PointScannerLoader {
                     new ClassPathScanningCandidateComponentProvider(false);
             scanner.addIncludeFilter(new AnnotationTypeFilter(PointController.class));
             for (BeanDefinition beanDefinition : scanner.findCandidateComponents(className)) {
-                Class<?> aClass = Class.forName(beanDefinition.getBeanClassName());
+                String beanClassName = beanDefinition.getBeanClassName();
+                if (beanClassName == null) continue;
+                Class<?> aClass = ClassUtils.forName(beanClassName, context.getClassLoader());
                 result.add(aClass);
             }
         }

@@ -1,5 +1,6 @@
 package kz.botcs.point;
 
+import kz.botcs.CustomScope;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Component
-@Scope("point")
+@Scope(CustomScope.POINT_SCOPE)
 public @interface PointController {
     String chatbotId();
 }
