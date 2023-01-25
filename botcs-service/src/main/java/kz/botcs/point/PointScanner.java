@@ -1,9 +1,9 @@
 package kz.botcs.point;
 
-import kz.botcs.ChatBotUser;
 import kz.botcs.OutResponse;
 import kz.botcs.builder.ResponseBuilder;
 import kz.botcs.chatbot.CallbackInMessage;
+import kz.botcs.chatbot.ChatBotUser;
 import kz.botcs.chatbot.InMessage;
 import kz.botcs.chatbot.TextInMessage;
 import kz.botcs.point.para.CallbackMessageId;
@@ -11,7 +11,6 @@ import kz.botcs.point.para.PhotoId;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
