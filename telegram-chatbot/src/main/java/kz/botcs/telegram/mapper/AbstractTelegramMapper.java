@@ -39,6 +39,7 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     @Mapping(target = "chatId", source = "userId")
     @Mapping(target = "messageId", source = "textOutMessage.id")
     @Mapping(target = "replyMarkup", source = "textOutMessage.inlineButtonMarkup")
+    @Mapping(target = "parseMode", constant = "markdown")
     @Mapping(target = "text", source = "textOutMessage.text")
     public abstract TextMessage toMessageTo(Integer userId, TextOutMessage textOutMessage);
 

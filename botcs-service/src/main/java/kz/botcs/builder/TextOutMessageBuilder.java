@@ -59,7 +59,7 @@ public class TextOutMessageBuilder {
         }
 
         public TextOutMessageBuilder.ButtonsBuilder add(String title, String keyword) {
-            return add(title, keyword, null);
+            return add(title, keyword, "");
         }
 
 

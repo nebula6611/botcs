@@ -18,7 +18,7 @@ public class PointContainer {
     public void put(String chatbotId, String keyword, Class<? extends Annotation> type, Point point) {
         Key key = new Key(chatbotId, keyword, type);
         if (map.containsKey(key)) {
-            throw new IllegalStateException("Point already exist");
+            throw new IllegalStateException("Point already exist: " + keyword + " " + type.getSimpleName());
         }
         map.put(key, point);
     }
