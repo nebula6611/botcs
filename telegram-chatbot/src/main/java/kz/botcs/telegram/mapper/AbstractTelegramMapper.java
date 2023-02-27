@@ -7,14 +7,12 @@ import kz.botcs.chatbot.outmessage.BottomMenuOutMessage;
 import kz.botcs.chatbot.outmessage.InlineButton;
 import kz.botcs.chatbot.outmessage.InlineButtonMarkup;
 import kz.botcs.chatbot.outmessage.TextOutMessage;
-import kz.botcs.telegram.dto.in.CallbackQuery;
-import kz.botcs.telegram.dto.in.Message;
-import kz.botcs.telegram.dto.in.PhotoSize;
-import kz.botcs.telegram.dto.in.Update;
+import kz.botcs.telegram.dto.in.InCallbackQuery;
+import kz.botcs.telegram.dto.in.InTeleMessage;
+import kz.botcs.telegram.dto.in.InPhotoSize;
+import kz.botcs.telegram.dto.in.InUpdate;
 import kz.botcs.telegram.dto.out.*;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 
 import java.util.List;
 import java.util.function.Function;
@@ -25,7 +23,7 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     protected static final String CALLBACK_DATA_SEPARATOR = "#SEPARATOR#";
 
     @Override
-    public InMessage toInMessage(Update update) {
+    public InMessage toInMessage(InUpdate update) {
         if (update.getMessage() != null) {
             return toTextInMessage(update.getMessage());
         }
@@ -36,40 +34,61 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     }
 
     @Override
+    public OutTextMessage toMessageTo(
+            Integer userId, TextOutMessage textOutMessage,
+            OutReplyKeyboardMarkup replyKeyboardMarkup) {
+        return ImmutableOutTextMessage.builder()
+                .from(toMessageTo(userId, textOutMessage))
+                .replyMarkup(replyKeyboardMarkup)
+                .build();
+    }
+
     @Mapping(target = "chatId", source = "userId")
     @Mapping(target = "messageId", source = "textOutMessage.id")
     @Mapping(target = "replyMarkup", source = "textOutMessage.inlineButtonMarkup")
     @Mapping(target = "parseMode", constant = "markdown")
     @Mapping(target = "text", source = "textOutMessage.text")
-    public abstract TextMessage toMessageTo(Integer userId, TextOutMessage textOutMessage);
+    public abstract OutTextMessage toMessageTo(Integer userId, TextOutMessage textOutMessage);
 
 
     @Override
+    public OutPhotoMessage toPhoto(
+            Integer userId, TextOutMessage textOutMessage,
+            OutReplyKeyboardMarkup replyKeyboardMarkup) {
+        return ImmutableOutPhotoMessage.builder()
+                .from(toPhoto(userId, textOutMessage))
+                .replyMarkup(replyKeyboardMarkup)
+                .build();
+    }
+
     @Mapping(target = "chatId", source = "userId")
     @Mapping(target = "messageId", source = "textOutMessage.id")
     @Mapping(target = "replyMarkup", source = "textOutMessage.inlineButtonMarkup")
     @Mapping(target = "photo", source = "textOutMessage.photoId")
+    @Mapping(target = "parseMode", constant = "markdown")
     @Mapping(target = "caption", source = "textOutMessage.text")
-    public abstract PhotoMessage toPhoto(Integer userId, TextOutMessage textOutMessage);
+    public abstract OutPhotoMessage toPhoto(Integer userId, TextOutMessage textOutMessage);
 
     @Override
     @Mapping(target = "resizeKeyboard", constant = "true")
     @Mapping(target = "oneTimeKeyboard", source = "oneTime")
     @Mapping(target = "keyboard", expression = "java(map(outMessage.getMap(),this::toKeyboardButton))")
-    public abstract ReplyKeyboardMarkup toReplyKeyboardMarkup(BottomMenuOutMessage outMessage);
+    public abstract OutReplyKeyboardMarkup toReplyKeyboardMarkup(BottomMenuOutMessage outMessage);
 
     @Mapping(target = "photoId", source = "photo")
-    protected abstract TextInMessage toTextInMessage(Message message);
+    @Mapping(target = "from", source = "fromVal")
+    protected abstract TextInMessage toTextInMessage(InTeleMessage message);
 
-    protected String toPhotoId(List<PhotoSize> photo) {
+    protected String toPhotoId(List<InPhotoSize> photo) {
         if (photo == null) return null;
         return photo.get(0).getFileId();
     }
 
     @Mapping(target = "keyword", source = "data", qualifiedByName = "toKeyword")
     @Mapping(target = "text", source = "data", qualifiedByName = "toText")
+    @Mapping(target = "from", source = "fromVal")
     @Mapping(target = "callbackMessageId", source = "message.messageId")
-    protected abstract CallbackInMessage toCallbackInMessage(CallbackQuery callbackQuery);
+    protected abstract CallbackInMessage toCallbackInMessage(InCallbackQuery callbackQuery);
 
     @Named("toKeyword")
     protected String toKeyword(String data) {
@@ -84,14 +103,14 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     }
 
     @Mapping(target = "inlineKeyboard", expression = "java(map(inlineButtonMarkup.getMap(),this::toInlineKeyboardButton))")
-    protected abstract InlineKeyboardMarkup toInlineKeyboardMarkup(InlineButtonMarkup inlineButtonMarkup);
+    protected abstract OutInlineKeyboardMarkup toInlineKeyboardMarkup(InlineButtonMarkup inlineButtonMarkup);
 
     @Mapping(target = "text", source = ".")
-    protected abstract KeyboardButton toKeyboardButton(String title);
+    protected abstract OutKeyboardButton toKeyboardButton(String title);
 
     @Mapping(target = "text", source = "title")
     @Mapping(target = "callbackData", expression = "java(button.getKeyword()+CALLBACK_DATA_SEPARATOR+button.getText())")
-    protected abstract InlineKeyboardButton toInlineKeyboardButton(InlineButton button);
+    protected abstract OutInlineKeyboardButton toInlineKeyboardButton(InlineButton button);
 
     protected <V, T> List<List<T>> map(List<List<V>> vs, Function<V, T> converter) {
         if (vs == null) return null;
@@ -102,6 +121,6 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
 
     @Override
     @Mapping(target = "url", source = ".")
-    public abstract Webhook toWebhook(String webhookUrl);
+    public abstract OutWebhook toWebhook(String webhookUrl);
 
 }

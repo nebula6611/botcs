@@ -3,20 +3,25 @@ package kz.botcs.telegram.mapper;
 import kz.botcs.chatbot.InMessage;
 import kz.botcs.chatbot.outmessage.BottomMenuOutMessage;
 import kz.botcs.chatbot.outmessage.TextOutMessage;
-import kz.botcs.telegram.dto.in.Update;
-import kz.botcs.telegram.dto.out.TextMessage;
-import kz.botcs.telegram.dto.out.PhotoMessage;
-import kz.botcs.telegram.dto.out.ReplyKeyboardMarkup;
-import kz.botcs.telegram.dto.out.Webhook;
+import kz.botcs.telegram.dto.in.InUpdate;
+import kz.botcs.telegram.dto.out.OutTextMessage;
+import kz.botcs.telegram.dto.out.OutPhotoMessage;
+import kz.botcs.telegram.dto.out.OutReplyKeyboardMarkup;
+import kz.botcs.telegram.dto.out.OutWebhook;
 
 public interface TelegramMapper {
-    InMessage toInMessage(Update update);
+    InMessage toInMessage(InUpdate update);
 
-    TextMessage toMessageTo(Integer userIdInt, TextOutMessage outMessage);
+    OutTextMessage toMessageTo(
+            Integer userId, TextOutMessage textOutMessage,
+            OutReplyKeyboardMarkup replyKeyboardMarkup);
 
-    PhotoMessage toPhoto(Integer userId, TextOutMessage textOutMessage);
 
-    ReplyKeyboardMarkup toReplyKeyboardMarkup(BottomMenuOutMessage outMessage);
+    OutPhotoMessage toPhoto(
+            Integer userId, TextOutMessage textOutMessage,
+            OutReplyKeyboardMarkup replyKeyboardMarkup);
 
-    Webhook toWebhook(String webhookUrl);
+    OutReplyKeyboardMarkup toReplyKeyboardMarkup(BottomMenuOutMessage outMessage);
+
+    OutWebhook toWebhook(String webhookUrl);
 }

@@ -4,5 +4,5 @@ plugins {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter:2.6.6'
-    api project(':botcs-service')
+    implementation project(':botcs-service')
 }

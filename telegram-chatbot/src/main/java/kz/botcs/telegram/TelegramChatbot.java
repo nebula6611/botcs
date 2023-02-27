@@ -11,18 +11,14 @@ import kz.botcs.chatbot.InMessage;
 import kz.botcs.chatbot.outmessage.BottomMenuOutMessage;
 import kz.botcs.chatbot.outmessage.OutMessage;
 import kz.botcs.chatbot.outmessage.TextOutMessage;
-import kz.botcs.telegram.dto.in.Update;
-import kz.botcs.telegram.dto.out.AnswerCallbackQuery;
-import kz.botcs.telegram.dto.out.PhotoMessage;
-import kz.botcs.telegram.dto.out.ReplyKeyboardMarkup;
-import kz.botcs.telegram.dto.out.TextMessage;
+import kz.botcs.telegram.dto.in.InUpdate;
+import kz.botcs.telegram.dto.out.*;
 import kz.botcs.telegram.mapper.DefaultTelegramMapper;
 import kz.botcs.telegram.mapper.TelegramMapper;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class TelegramChatbot implements Chatbot<Update> {
+public class TelegramChatbot implements Chatbot<InUpdate> {
 
     private final String id;
     private final FeignTarget feignTarget;
@@ -45,12 +41,14 @@ public class TelegramChatbot implements Chatbot<Update> {
     }
 
     @Override
-    public InMessage toInMessage(Update update) {
+    public InMessage toInMessage(InUpdate update) {
         InMessage inMessage = mapper.toInMessage(update);
         if (inMessage instanceof CallbackInMessage) {
             CallbackInMessage callbackInMessage = (CallbackInMessage) inMessage;
-            AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery();
-            answerCallbackQuery.setCallbackQueryId(callbackInMessage.getId());
+            OutAnswerCallbackQuery answerCallbackQuery = ImmutableOutAnswerCallbackQuery
+                    .builder()
+                    .callbackQueryId(callbackInMessage.getId())
+                    .build();
             feignTarget.answerCallbackQuery(answerCallbackQuery);
         }
         return inMessage;
@@ -60,51 +58,30 @@ public class TelegramChatbot implements Chatbot<Update> {
     public void send(String userId, List<OutMessage> outMessages) {
         Integer userIdInt = Integer.parseInt(userId);
 
-        final ReplyKeyboardMarkup replyKeyboardMarkup = outMessages.stream()
+        final OutReplyKeyboardMarkup replyKeyboardMarkup = outMessages.stream()
                 .filter(outMessage -> outMessage instanceof BottomMenuOutMessage)
                 .map(outMessage -> (BottomMenuOutMessage) outMessage)
                 .map(mapper::toReplyKeyboardMarkup)
                 .reduce((x, y) -> y).orElse(null);
 
-        List<TextMessage> textMessages = outMessages.stream()
-                .filter(outMessage -> outMessage instanceof TextOutMessage)
-                .map(outMessage -> (TextOutMessage) outMessage)
-                .filter(x -> x.getPhotoId() == null)
-                .map(x -> mapper.toMessageTo(userIdInt, x))
-                .peek(x -> setReplyKeyboardMarkup(x, replyKeyboardMarkup))
-                .collect(Collectors.toList());
-
-        List<PhotoMessage> photoMessages = outMessages.stream()
-                .filter(outMessage -> outMessage instanceof TextOutMessage)
-                .map(outMessage -> (TextOutMessage) outMessage)
-                .filter(x -> x.getPhotoId() != null)
-                .map(x -> mapper.toPhoto(userIdInt, x))
-                .peek(x -> setReplyKeyboardMarkup(x, replyKeyboardMarkup))
-                .collect(Collectors.toList());
-
-        // ------------------------------------------------------
-
-        for (TextMessage textMessage : textMessages) {
-            if (textMessage.getMessageId() == null) feignTarget.sendMessage(textMessage);
-            else feignTarget.editMessageText(textMessage);
-        }
-
-        for (PhotoMessage photoMessage : photoMessages) {
-            if (photoMessage.getMessageId() == null) feignTarget.sendPhoto(photoMessage);
-            else feignTarget.editMessageCaption(photoMessage);
+        for (OutMessage outMessage : outMessages) {
+            if (!(outMessage instanceof TextOutMessage)) continue;
+            TextOutMessage textOutMessage = (TextOutMessage) outMessage;
+            if (textOutMessage.getPhotoId() != null) {
+                OutPhotoMessage outTeleMessage = mapper.toPhoto(userIdInt, textOutMessage, replyKeyboardMarkup);
+                if (outTeleMessage.getMessageId() == null) feignTarget.sendPhoto(outTeleMessage);
+                else feignTarget.editMessageCaption(outTeleMessage);
+            } else {
+                OutTextMessage outTeleMessage = mapper.toMessageTo(userIdInt, textOutMessage, replyKeyboardMarkup);
+                if (outTeleMessage.getMessageId() == null) feignTarget.sendMessage(outTeleMessage);
+                else feignTarget.editMessageText(outTeleMessage);
+            }
         }
     }
 
-    private void setReplyKeyboardMarkup(kz.botcs.telegram.dto.out.OutMessage textMessage, ReplyKeyboardMarkup replyKeyboardMarkup) {
-        if (textMessage.getReplyMarkup() == null) {
-            textMessage.setReplyMarkup(replyKeyboardMarkup);
-        }
-    }
-
-    public List<Update> getUpdates(Integer offset) {
+    public List<InUpdate> getUpdates(Integer offset) {
         return feignTarget.getUpdates(offset).getResult();
     }
-
 
     public void setWebhook(String url) {
         this.feignTarget.setWebhook(mapper.toWebhook(url));

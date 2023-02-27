@@ -4,5 +4,5 @@ plugins {
 
 dependencies {
     implementation 'org.springframework:spring-context:5.3.19'
-    api project(':botcs-chatbot')
+    implementation project(':botcs-chatbot')
 }
