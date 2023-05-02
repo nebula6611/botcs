@@ -6,9 +6,9 @@ import feign.RequestLine;
 import kz.botcs.telegram.dto.in.InUpdateResult;
 import kz.botcs.telegram.dto.out.*;
 
-public interface FeignTarget {
+public interface TeleFeignTarget {
     @RequestLine("GET /getUpdates?offset={offset}")
-    InUpdateResult getUpdates(@Param("offset") Integer offset);
+    InUpdateResult getUpdates(@Param("offset") Long offset);
 
     @RequestLine("POST /sendMessage")
     @Headers("Content-Type: application/json")

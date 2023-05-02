@@ -21,7 +21,7 @@ import java.util.List;
 public class TelegramChatbot implements Chatbot<InUpdate> {
 
     private final String id;
-    private final FeignTarget feignTarget;
+    private final TeleFeignTarget feignTarget;
     private final TelegramMapper mapper;
 
     public TelegramChatbot(String id, String token) {
@@ -31,7 +31,7 @@ public class TelegramChatbot implements Chatbot<InUpdate> {
                 .encoder(new JacksonEncoder())
                 .decoder(new JacksonDecoder())
                 .logLevel(Logger.Level.BASIC)
-                .target(FeignTarget.class, "https://api.telegram.org/bot" + token);
+                .target(TeleFeignTarget.class, "https://api.telegram.org/bot" + token);
         this.mapper = new DefaultTelegramMapper();
     }
 
@@ -79,7 +79,7 @@ public class TelegramChatbot implements Chatbot<InUpdate> {
         }
     }
 
-    public List<InUpdate> getUpdates(Integer offset) {
+    public List<InUpdate> getUpdates(Long offset) {
         return feignTarget.getUpdates(offset).getResult();
     }
 

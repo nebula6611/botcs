@@ -37,10 +37,9 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     public OutTextMessage toMessageTo(
             Integer userId, TextOutMessage textOutMessage,
             OutReplyKeyboardMarkup replyKeyboardMarkup) {
-        return ImmutableOutTextMessage.builder()
-                .from(toMessageTo(userId, textOutMessage))
-                .replyMarkup(replyKeyboardMarkup)
-                .build();
+        ImmutableOutTextMessage result = (ImmutableOutTextMessage) toMessageTo(userId, textOutMessage);
+        if (replyKeyboardMarkup != null) result = result.withReplyMarkup(replyKeyboardMarkup);
+        return result;
     }
 
     @Mapping(target = "chatId", source = "userId")
@@ -80,7 +79,7 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     protected abstract TextInMessage toTextInMessage(InTeleMessage message);
 
     protected String toPhotoId(List<InPhotoSize> photo) {
-        if (photo == null) return null;
+        if (photo == null || photo.isEmpty()) return null;
         return photo.get(0).getFileId();
     }
 

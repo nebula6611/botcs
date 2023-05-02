@@ -7,6 +7,6 @@ import org.immutables.value.Value;
 @Value.Immutable
 public interface OutKeyboardButton extends RestDTO {
 
-    public String getText();
+    String getText();
 }
 
