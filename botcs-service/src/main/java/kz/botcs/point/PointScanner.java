@@ -102,8 +102,10 @@ public class PointScanner {
             }
         }
         if (annotation instanceof Data) {
-            if (args.getData() != null && !args.getData().getClass().equals(parameterType)) {
-                throw new RuntimeException();
+            if (args.getData() != null && !args.getData().getClass().getName()
+                    .equals(parameterType.getName())) {
+                throw new RuntimeException("required class with type: " + parameterType.getName() +
+                        ", found:" + args.getData().getClass().getName());
             }
             return args.getData();
         }

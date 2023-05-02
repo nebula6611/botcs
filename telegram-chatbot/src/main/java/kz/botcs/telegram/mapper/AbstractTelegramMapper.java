@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public abstract class AbstractTelegramMapper implements TelegramMapper {
     protected static final String CALLBACK_DATA_SEPARATOR = ",@";
 
-    private final Map<String, String> classNameMap = new ConcurrentHashMap<>();
+    private final Map<String, Class<?>> classNameMap = new ConcurrentHashMap<>();
 
     @Override
     public InMessage toInMessage(InUpdate update) {
@@ -108,11 +108,11 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
         if (array.length < 2) return null;
 
         try {
-            Class<?> aClass = Class.forName(classNameMap.get(array[1]));
+            Class<?> aClass = classNameMap.get(array[1]);
             if (aClass.equals(String.class)) return array[2];
             Method method = aClass.getMethod("valueOf", String.class);
             return method.invoke(null, array[2]);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+        } catch (NoSuchMethodException | IllegalAccessException |
                  InvocationTargetException e) {
             throw new RuntimeException(e);
         }
@@ -143,7 +143,7 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
         Object data = button.getData();
         if (data == null) return button.getKeyword();
         Class<?> dataClass = data.getClass();
-        classNameMap.put(dataClass.getSimpleName(), dataClass.getName());
+        classNameMap.put(dataClass.getSimpleName(), dataClass);
         return button.getKeyword() + CALLBACK_DATA_SEPARATOR +
                 dataClass.getSimpleName() + CALLBACK_DATA_SEPARATOR +
                 button.getData().toString();
