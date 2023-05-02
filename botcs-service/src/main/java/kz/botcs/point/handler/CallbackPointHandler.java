@@ -6,6 +6,8 @@ import kz.botcs.point.Pair;
 import kz.botcs.point.PointHandler;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
+
 @Component
 public class CallbackPointHandler implements PointHandler<CallbackPoint> {
 
@@ -25,10 +27,10 @@ public class CallbackPointHandler implements PointHandler<CallbackPoint> {
     }
 
     @Override
-    public Pair<String, String> keywordAndText(String chatbotId, InMessage inMessage) {
+    public Pair<String, Object> keywordAndData(String chatbotId, InMessage inMessage) {
         if (!(inMessage instanceof CallbackInMessage)) return null;
         CallbackInMessage callbackInMessage = (CallbackInMessage) inMessage;
-        return new Pair<>(callbackInMessage.getKeyword(), callbackInMessage.getText());
+        return new Pair<>(callbackInMessage.getKeyword(), callbackInMessage.getData());
     }
 
 }

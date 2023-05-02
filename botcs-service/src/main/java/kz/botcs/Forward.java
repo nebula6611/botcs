@@ -5,12 +5,12 @@ import java.lang.annotation.Annotation;
 public class Forward {
     private final Class<? extends Annotation> type;
     private final String keyword;
-    private final String text;
+    private final Object data;
 
-    public Forward(Class<? extends Annotation> type, String keyword, String text) {
+    public Forward(Class<? extends Annotation> type, String keyword, Object data) {
         this.type = type;
         this.keyword = keyword;
-        this.text = text;
+        this.data = data;
     }
 
     public Class<? extends Annotation> getType() {
@@ -21,7 +21,7 @@ public class Forward {
         return keyword;
     }
 
-    public String getText() {
-        return text;
+    public Object getData() {
+        return data;
     }
 }

@@ -64,13 +64,13 @@ public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
     private OutResponse getResponse(String chatbotId, InMessage inMessage) {
 
         for (PointHandler<?> pointHandler : pointHandlerContainer.getPointHandlers()) {
-            Pair<String, String> keywordAndText = pointHandler.keywordAndText(chatbotId, inMessage);
+            Pair<String, Object> keywordAndText = pointHandler.keywordAndData(chatbotId, inMessage);
             if (keywordAndText == null) continue;
             String keyword = keywordAndText.getKey();
-            String text = keywordAndText.getValue();
+            Object data = keywordAndText.getValue();
             Point point = pointContainer.get(chatbotId, keyword, pointHandler.getType());
             if (point == null) continue;
-            return point.execute(new PointArgs(chatbotId, text, inMessage));
+            return point.execute(new PointArgs(chatbotId, data, inMessage));
         }
 
         return ResponseBuilder.ofText("point not found").build();
@@ -78,10 +78,10 @@ public class DefaultInMessageHandlerFactory implements InMessageHandlerFactory {
 
     private OutResponse getResponse(String chatbotId, InMessage inMessage, Forward forward) {
         String keyword = forward.getKeyword();
-        String text = forward.getText();
+        Object data = forward.getData();
         Point point = pointContainer.get(chatbotId, keyword, forward.getType());
         if (point == null) return ResponseBuilder.ofText("forward point not found").build();
-        return point.execute(new PointArgs(chatbotId, text, inMessage));
+        return point.execute(new PointArgs(chatbotId, data, inMessage));
     }
 
 

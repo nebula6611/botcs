@@ -8,19 +8,27 @@ import kz.botcs.chatbot.outmessage.InlineButton;
 import kz.botcs.chatbot.outmessage.InlineButtonMarkup;
 import kz.botcs.chatbot.outmessage.TextOutMessage;
 import kz.botcs.telegram.dto.in.InCallbackQuery;
-import kz.botcs.telegram.dto.in.InTeleMessage;
 import kz.botcs.telegram.dto.in.InPhotoSize;
+import kz.botcs.telegram.dto.in.InTeleMessage;
 import kz.botcs.telegram.dto.in.InUpdate;
 import kz.botcs.telegram.dto.out.*;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Mapper(implementationName = "DefaultTelegramMapper")
 public abstract class AbstractTelegramMapper implements TelegramMapper {
-    protected static final String CALLBACK_DATA_SEPARATOR = "#SEPARATOR#";
+    protected static final String CALLBACK_DATA_SEPARATOR = ",@";
+
+    private final Map<String, String> classNameMap = new ConcurrentHashMap<>();
 
     @Override
     public InMessage toInMessage(InUpdate update) {
@@ -84,7 +92,7 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     }
 
     @Mapping(target = "keyword", source = "data", qualifiedByName = "toKeyword")
-    @Mapping(target = "text", source = "data", qualifiedByName = "toText")
+    @Mapping(target = "data", source = "data", qualifiedByName = "toText")
     @Mapping(target = "from", source = "fromVal")
     @Mapping(target = "callbackMessageId", source = "message.messageId")
     protected abstract CallbackInMessage toCallbackInMessage(InCallbackQuery callbackQuery);
@@ -95,10 +103,19 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     }
 
     @Named("toText")
-    protected String toText(String data) {
-        String[] array = data.split(CALLBACK_DATA_SEPARATOR);
+    protected Object toData(String data) {
+        String[] array = data.split(CALLBACK_DATA_SEPARATOR, 3);
         if (array.length < 2) return null;
-        return array[1];
+
+        try {
+            Class<?> aClass = Class.forName(classNameMap.get(array[1]));
+            if (aClass.equals(String.class)) return array[2];
+            Method method = aClass.getMethod("valueOf", String.class);
+            return method.invoke(null, array[2]);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                 InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Mapping(target = "inlineKeyboard", expression = "java(map(inlineButtonMarkup.getMap(),this::toInlineKeyboardButton))")
@@ -108,8 +125,12 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
     protected abstract OutKeyboardButton toKeyboardButton(String title);
 
     @Mapping(target = "text", source = "title")
-    @Mapping(target = "callbackData", expression = "java(button.getKeyword()+CALLBACK_DATA_SEPARATOR+button.getText())")
+    @Mapping(target = "callbackData", expression = "java(toCallbackData(button))")
     protected abstract OutInlineKeyboardButton toInlineKeyboardButton(InlineButton button);
+
+    @Override
+    @Mapping(target = "url", source = ".")
+    public abstract OutWebhook toWebhook(String webhookUrl);
 
     protected <V, T> List<List<T>> map(List<List<V>> vs, Function<V, T> converter) {
         if (vs == null) return null;
@@ -118,8 +139,14 @@ public abstract class AbstractTelegramMapper implements TelegramMapper {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    @Mapping(target = "url", source = ".")
-    public abstract OutWebhook toWebhook(String webhookUrl);
+    protected String toCallbackData(InlineButton button) {
+        Object data = button.getData();
+        if (data == null) return button.getKeyword();
+        Class<?> dataClass = data.getClass();
+        classNameMap.put(dataClass.getSimpleName(), dataClass.getName());
+        return button.getKeyword() + CALLBACK_DATA_SEPARATOR +
+                dataClass.getSimpleName() + CALLBACK_DATA_SEPARATOR +
+                button.getData().toString();
+    }
 
 }

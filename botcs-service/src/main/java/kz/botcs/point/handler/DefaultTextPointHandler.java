@@ -6,6 +6,8 @@ import kz.botcs.point.Pair;
 import kz.botcs.point.PointHandler;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
+
 @Component
 public class DefaultTextPointHandler implements PointHandler<DefaultTextPoint> {
 
@@ -27,7 +29,7 @@ public class DefaultTextPointHandler implements PointHandler<DefaultTextPoint> {
     }
 
     @Override
-    public Pair<String, String> keywordAndText(String chatbotId, InMessage inMessage) {
+    public Pair<String, Object> keywordAndData(String chatbotId, InMessage inMessage) {
         if (!(inMessage instanceof TextInMessage)) return null;
         TextInMessage textInMessage = (TextInMessage) inMessage;
         return new Pair<>(KEYWORD, textInMessage.getText());

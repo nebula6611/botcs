@@ -7,6 +7,7 @@ import kz.botcs.chatbot.ChatBotUser;
 import kz.botcs.chatbot.InMessage;
 import kz.botcs.chatbot.TextInMessage;
 import kz.botcs.point.para.CallbackMessageId;
+import kz.botcs.point.para.Data;
 import kz.botcs.point.para.PhotoId;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -17,10 +18,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 @Component
 public class PointScanner {
+    private final Logger logger = Logger.getLogger(PointScanner.class.getName());
 
     private final PointContainer pointContainer;
     private final PointHandlerContainer pointHandlerContainer;
@@ -35,6 +39,7 @@ public class PointScanner {
         this.context = context;
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void scan(Collection<Class<?>> controllerTypes) {
         for (Class<?> controllerType : controllerTypes) {
             PointController controllerAnnotation = controllerType.getAnnotation(PointController.class);
@@ -55,7 +60,8 @@ public class PointScanner {
                         Object controller = context.getBean(controllerType);
                         return (OutResponse) method.invoke(controller, parameters);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        return errorOutResponse(e);
+                        logger.log(Level.SEVERE, "something went wrong", e);
+                        return ResponseBuilder.ofText("something went wrong").build();
                     }
                 };
                 for (PointHandler pointHandler : pointHandlerContainer.getPointHandlers()) {
@@ -67,11 +73,6 @@ public class PointScanner {
                 }
             }
         }
-    }
-
-    private OutResponse errorOutResponse(Exception e) {
-        e.printStackTrace();
-        return ResponseBuilder.ofText("something went wrong").build();
     }
 
     private Object getParameterForType(
@@ -99,8 +100,14 @@ public class PointScanner {
                 }
                 return null;
             }
-            return args.getText();
         }
+        if (annotation instanceof Data) {
+            if (args.getData() != null && !args.getData().getClass().equals(parameterType)) {
+                throw new RuntimeException();
+            }
+            return args.getData();
+        }
+
         throw new IllegalArgumentException("unknown type: " + parameterType.getName());
     }
 }

@@ -6,6 +6,7 @@ import kz.botcs.chatbot.outmessage.*;
 import kz.botcs.point.handler.CallbackPoint;
 import kz.botcs.point.handler.CommandPoint;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -56,7 +57,7 @@ public class OutResponseBuilder {
         return this;
     }
 
-    public OutResponseBuilder forwardCallback(String callback, String data) {
+    public OutResponseBuilder forwardCallback(String callback, Object data) {
         forward = new Forward(CallbackPoint.class, callback, data);
         return this;
     }
@@ -107,8 +108,8 @@ public class OutResponseBuilder {
                 return this;
             }
 
-            public ButtonsBuilder add(String title, String keyword, String text) {
-                add(new InlineButton(title, keyword, text));
+            public ButtonsBuilder add(String title, String keyword, String obj) {
+                line.add(new InlineButton(title, keyword, obj));
                 return this;
             }
 

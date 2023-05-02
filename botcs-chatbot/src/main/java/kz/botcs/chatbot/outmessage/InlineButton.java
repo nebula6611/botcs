@@ -1,14 +1,16 @@
 package kz.botcs.chatbot.outmessage;
 
+import java.io.Serializable;
+
 public class InlineButton {
     private final String title;
     private final String keyword;
-    private final String text;
+    private final Object data;
 
-    public InlineButton(String title, String keyword, String text) {
+    public InlineButton(String title, String keyword, Object data) {
         this.title = title;
         this.keyword = keyword;
-        this.text = text;
+        this.data = data;
     }
 
     public String getTitle() {
@@ -19,7 +21,7 @@ public class InlineButton {
         return keyword;
     }
 
-    public String getText() {
-        return text;
+    public Object getData() {
+        return data;
     }
 }

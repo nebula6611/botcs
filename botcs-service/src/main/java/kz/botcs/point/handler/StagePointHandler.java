@@ -8,6 +8,8 @@ import kz.botcs.point.PointHandler;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
+
 @Component
 public class StagePointHandler implements PointHandler<StagePoint> {
 
@@ -33,7 +35,7 @@ public class StagePointHandler implements PointHandler<StagePoint> {
     }
 
     @Override
-    public Pair<String, String> keywordAndText(String chatbotId, InMessage inMessage) {
+    public Pair<String, Object> keywordAndData(String chatbotId, InMessage inMessage) {
         if (!(inMessage instanceof TextInMessage)) return null;
         TextInMessage textInMessage = (TextInMessage) inMessage;
         String stage = userDataProvider.getObject().getStage();

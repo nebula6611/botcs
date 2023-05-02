@@ -3,14 +3,16 @@ package kz.botcs.point;
 
 import kz.botcs.chatbot.InMessage;
 
+import java.io.Serializable;
+
 public class PointArgs {
     private final String chatbotId;
-    private final String text;
+    private final Object data;
     private final InMessage inMessage;
 
-    public PointArgs(String chatbotId, String text, InMessage inMessage) {
+    public PointArgs(String chatbotId, Object data, InMessage inMessage) {
         this.chatbotId = chatbotId;
-        this.text = text;
+        this.data = data;
         this.inMessage = inMessage;
     }
 
@@ -18,8 +20,8 @@ public class PointArgs {
         return chatbotId;
     }
 
-    public String getText() {
-        return text;
+    public Object getData() {
+        return data;
     }
 
     public InMessage getInMessage() {

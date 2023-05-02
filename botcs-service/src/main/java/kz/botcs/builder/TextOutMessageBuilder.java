@@ -3,6 +3,7 @@ package kz.botcs.builder;
 import kz.botcs.chatbot.outmessage.InlineButton;
 import kz.botcs.chatbot.outmessage.InlineButtonMarkup;
 import kz.botcs.chatbot.outmessage.TextOutMessage;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,13 +54,12 @@ public class TextOutMessageBuilder {
             return this;
         }
 
-        public TextOutMessageBuilder.ButtonsBuilder add(String title, String keyword, String text) {
-            add(new InlineButton(title, keyword, text));
-            return this;
+        public TextOutMessageBuilder.ButtonsBuilder add(String title, String keyword, Object data) {
+            return add(new InlineButton(title, keyword, data));
         }
 
         public TextOutMessageBuilder.ButtonsBuilder add(String title, String keyword) {
-            return add(title, keyword, "");
+            return add(title, keyword, null);
         }
 
 
